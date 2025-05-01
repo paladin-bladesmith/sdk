@@ -3,6 +3,7 @@ import { PublicKey } from "@solana/web3.js";
 // Program IDs
 export const PROGRAM_ID = new PublicKey("2fzrtg7ckXTFxjgsXbAWLLvXr4wJK9xfUjJJ69uZ7chb");
 export const REWARDS_PROGRAM_ID = new PublicKey("7LdHk6jnrY4kJW79mVXshTzduvgn3yz4hZzHpzTbt7Ph");
+export const STAKE_PROGRAM_ID = new PublicKey("GQurxHCYQCNfYR37nHNb6ZiLWg3jpbh2fWv2RpzwGqRK");
 
 // Program addresses
 export const DEPLOYER = new PublicKey("CvgiX71JAvC1DjiwF2MmvXtcDtxKDgjzmqCGLg4vVQdk");
