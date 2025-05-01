@@ -58,6 +58,10 @@ export function serializeInstructionData(
   const discriminatorBuffer = Buffer.from([discriminator]);
   
   // Authority buffer (as metadata)
+  // TODO: Right now, the tx sender who the tokens are being
+  // locked on behalf of is constrained to being the authority
+  // that's signing this transaction.
+  // Determine if we need more flexibility here.
   const metadata = authority.toBuffer();
   
   // Convert amount to 8-byte little-endian buffer
