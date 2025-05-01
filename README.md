@@ -1,69 +1,61 @@
 # Paladin SDK
 
-A React-focused SDK for interacting with Paladin solana programs. Designed to work seamlessly with React applications and the Solana wallet adapter.
+A TypeScript SDK for interacting with Paladin Solana programs. Designed to work with any Solana wallet adapter.
 
 ## Installation
 
 ```bash
-npm install @paladin-bladesmith/sdk @solana/wallet-adapter-react
+npm install @paladin-bladesmith/sdk
 # or
-yarn add @paladin-bladesmith/sdk @solana/wallet-adapter-react
+yarn add @paladin-bladesmith/sdk
 ```
 
 ## Requirements
 
-- React 16.8+ (for hooks support)
-- Solana wallet adapter for React
+- A Solana wallet adapter with sendTransaction capability
+- Solana web3.js
 
 ## Usage
 
-### React Hooks (Recommended)
-
-Using our React hooks provides the simplest integration with your React application:
+The SDK provides a simple function-based API for interacting with Paladin protocols:
 
 ```typescript
-import { useLockup } from "@paladin-bladesmith/sdk";
+import { lockTokens } from "@paladin-bladesmith/sdk";
+import { Connection } from "@solana/web3.js";
 
-function LockupButton() {
-  const { lock, isReady } = useLockup();
+async function lockMyTokens(wallet, amount) {
+  const connection = new Connection("https://api.mainnet-beta.solana.com");
   
-  const handleLock = async () => {
-    try {
-      // Amount in tokens (will be automatically converted to proper units)
-      const amount = 1; 
-      
-      // Lock the tokens
-      const { signature, confirm } = await lock(amount);
-      console.log("Transaction sent:", signature);
-      
-      // Wait for confirmation
-      await confirm();
-      console.log("Transaction confirmed!");
-    } catch (error) {
-      console.error("Transaction failed:", error);
-    }
-  };
-  
-  return (
-    <button onClick={handleLock} disabled={!isReady}>
-      Lock Tokens
-    </button>
-  );
+  try {
+    const { signature, confirm } = await lockTokens(wallet, connection, amount);
+    console.log("Transaction sent:", signature);
+    
+    // Wait for confirmation
+    await confirm();
+    console.log("Transaction confirmed!");
+  } catch (error) {
+    console.error("Transaction failed:", error);
+  }
 }
 ```
 
 ## API Reference
 
-### React Hooks
+### `lockTokens(wallet, connection, amount)`
 
-#### `useLockup()`
+A function for locking tokens using any wallet adapter.
 
-A React hook for locking tokens using a connected wallet.
+#### Parameters
 
-##### Returns
+- `wallet`: A wallet adapter with `publicKey` and `sendTransaction` properties
+- `connection`: A Solana Connection instance
+- `amount`: Number of tokens to lock (in tokens, not raw units)
 
-- `lock`: Function that takes an amount (in tokens) and returns a promise with the transaction signature and a confirmation helper
-- `isReady`: Boolean indicating if the wallet is connected and ready
+#### Returns
+
+Promise that resolves to an object with:
+- `signature`: Transaction signature
+- `confirm`: Function that returns a promise for transaction confirmation
 
 ## License
 

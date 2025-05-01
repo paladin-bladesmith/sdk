@@ -4,5 +4,5 @@ export * from './utils';
 // Re-export actions
 export * from './actions';
 
-// Re-export React hooks directly
-export * from './react';
+// Export the functional API
+export * from './functional';

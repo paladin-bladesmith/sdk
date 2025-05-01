@@ -1,7 +1,7 @@
 {
   "name": "@paladin-bladesmith/sdk",
   "version": "0.1.0",
-  "description": "SDK for Paladin programs with React integration",
+  "description": "SDK for Paladin programs on Solana",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -20,8 +20,7 @@
   "keywords": [
     "solana",
     "blockchain",
-    "paladin",
-    "react"
+    "paladin"
   ],
   "engines": {
     "node": ">=20.0.0",
@@ -32,16 +31,8 @@
     "@solana/web3.js": "^1.90.0",
     "borsh": "^2.0.0"
   },
-  "peerDependencies": {
-    "react": ">=16.8.0",
-    "@solana/wallet-adapter-react": "^0.15.0"
-  },
   "devDependencies": {
     "@types/node": "^20.11.24",
-    "@types/react": "^18.2.0",
-    "@solana/wallet-adapter-react": "^0.15.0",
-    "@solana/wallet-adapter-base": "^0.9.23",
-    "react": "^18.2.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "tsup": "^8.3.5",
