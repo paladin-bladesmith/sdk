@@ -1,6 +1,6 @@
-# Paladin SDK for React
+# Paladin SDK
 
-A React-focused SDK for interacting with the Paladin Solana program. Designed to work seamlessly with React applications and the Solana wallet adapter.
+A React-focused SDK for interacting with Paladin solana programs. Designed to work seamlessly with React applications and the Solana wallet adapter.
 
 ## Installation
 
