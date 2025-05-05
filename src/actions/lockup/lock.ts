@@ -22,12 +22,12 @@ import {
   HOLDER_REWARDS_POOL,
   RECIPIENT_REWARDS,
   REWARDS_PROGRAM_ID
-} from "../utils/constants";
+} from "../../utils/constants";
 import { 
   getHolderRewardsAddress, 
   serializeInstructionData,
   getInstructionDetails 
-} from "../utils/helpers";
+} from "../../utils/helpers";
 
 /**
  * Creates a lockup instruction
