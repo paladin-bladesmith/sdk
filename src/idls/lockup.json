@@ -101,6 +101,14 @@
           ]
         },
         {
+          "name": "lockupPool",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Lockup pool"
+          ]
+        },
+        {
           "name": "lockupAccount",
           "isMut": true,
           "isSigner": false,
@@ -112,7 +120,7 @@
       "args": [],
       "discriminant": {
         "type": "u8",
-        "value": 1
+        "value": 2
       }
     },
     {
@@ -186,7 +194,7 @@
       "args": [],
       "discriminant": {
         "type": "u8",
-        "value": 2
+        "value": 3
       }
     }
   ],
