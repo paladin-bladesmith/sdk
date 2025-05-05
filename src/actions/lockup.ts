@@ -36,10 +36,12 @@ import {
  */
 export function getLockupInstruction({
   lockupAuthority,
+  lockupForPubkey,
   lockupAccount,
   amount,
 }: {
   lockupAuthority: PublicKey;
+  lockupForPubkey: PublicKey;
   lockupAccount: PublicKey;
   amount: number;
 }): TransactionInstruction {
@@ -49,7 +51,7 @@ export function getLockupInstruction({
   // Serialize instruction data
   const data = serializeInstructionData(
     instruction.discriminant.value, // Discriminator for Lockup instruction
-    lockupAuthority,
+    lockupForPubkey,
     BigInt(amount)
   );
 
@@ -179,10 +181,12 @@ export function getLockupInstruction({
 export async function makeLockupTransaction(
   account: PublicKey | string,
   amount: number,
-  connection: Connection
+  connection: Connection,
+  lockupForPubkey: PublicKey | string
 ): Promise<VersionedTransaction> {
   // Convert string to PublicKey if needed
   const pubkey = typeof account === 'string' ? new PublicKey(account) : account;
+  const lockupPubkey = typeof lockupForPubkey === 'string' ? new PublicKey(lockupForPubkey) : lockupForPubkey;
 
   if (!pubkey) throw new Error("Account is required");
   console.log("wallet pubkey:", pubkey.toBase58());
@@ -202,6 +206,7 @@ export async function makeLockupTransaction(
   // Get lockup instruction
   const lockupIx = getLockupInstruction({
     lockupAuthority: pubkey,
+    lockupForPubkey: lockupPubkey,
     lockupAccount: lockupAccount.publicKey,
     amount,
   });

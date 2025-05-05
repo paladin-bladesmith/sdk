@@ -45,24 +45,19 @@ export function collectHolderRewardsSeeds(tokenAccountAddress: PublicKey): Buffe
 /**
  * Serializes instruction data with discriminator, metadata, and amount
  * @param discriminator The instruction discriminator
- * @param authority The authority public key
+ * @param lockupForPubkey The pubkey to lock PAL for
  * @param amount The amount as bigint
  * @returns Buffer containing serialized instruction data
  */
 export function serializeInstructionData(
   discriminator: number,
-  authority: PublicKey,
+  lockupForPubkey: PublicKey,
   amount: bigint
 ): Buffer {
   // Create discriminator buffer
   const discriminatorBuffer = Buffer.from([discriminator]);
   
-  // Authority buffer (as metadata)
-  // TODO: Right now, the tx sender who the tokens are being
-  // locked on behalf of is constrained to being the authority
-  // that's signing this transaction.
-  // Determine if we need more flexibility here.
-  const metadata = authority.toBuffer();
+  const metadata = lockupForPubkey.toBuffer();
   
   // Convert amount to 8-byte little-endian buffer
   const amountBuffer = Buffer.alloc(8);

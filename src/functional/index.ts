@@ -21,12 +21,14 @@ export interface WalletAdapter {
  * 
  * @param wallet Wallet adapter interface with publicKey and sendTransaction
  * @param connection Solana connection
+ * @param lockupForPubkey The pubkey to lock PAL for
  * @param amount Amount of tokens to lock (in tokens, not raw units)
  * @returns Object containing signature and confirm function
  */
 export async function lockTokens(
   wallet: WalletAdapter,
   connection: Connection,
+  lockupForPubkey: PublicKey | string,
   amount: number
 ) {
   if (!wallet.publicKey) {
@@ -41,7 +43,8 @@ export async function lockTokens(
     const transaction = await makeLockupTransaction(
       wallet.publicKey,
       rawAmount,
-      connection
+      connection,
+      lockupForPubkey
     );
     
     // Send the transaction through the wallet adapter
