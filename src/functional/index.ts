@@ -1,6 +1,7 @@
 import { Connection, PublicKey, VersionedTransaction, Commitment } from '@solana/web3.js';
 import { makeLockupTransaction } from '../actions/lockup/lock';
 import { makeUnlockTransaction } from '../actions/lockup/unlock';
+import { makeWithdrawTransaction } from '../actions/lockup/withdraw';
 
 /**
  * Interface for wallet adapter like objects that can send transactions
@@ -129,3 +130,58 @@ export async function unlockTokens(
     throw error;
   }
 } 
+
+/**
+ * Withdraw tokens from a previously unlocked lockup
+ * 
+ * This function provides a simplified, non-React interface for withdrawing tokens
+ * after they have been unlocked.
+ * 
+ * @param wallet Wallet adapter interface with publicKey and sendTransaction
+ * @param connection Solana connection
+ * @param lockupAccount The pubkey of the lockup account to withdraw from
+ * @returns Object containing signature and confirm function
+ */
+export async function withdrawTokensLockup(
+  wallet: WalletAdapter,
+  connection: Connection,
+  lockupAccount: PublicKey | string
+) {
+  if (!wallet.publicKey) {
+    throw new Error('Wallet not connected');
+  }
+  
+  try {
+    // Create the transaction
+    const transaction = await makeWithdrawTransaction(
+      wallet.publicKey,
+      lockupAccount,
+      connection
+    );
+    
+    // Send the transaction through the wallet adapter
+    const signature = await wallet.sendTransaction(transaction, connection);
+    
+    // Get latest blockhash for transaction confirmation
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+    
+    // Return both signature and a helper for waiting for confirmation
+    return {
+      signature,
+      confirm: async (commitment: Commitment = 'confirmed') => {
+        // Use the proper confirmation strategy object
+        return connection.confirmTransaction(
+          {
+            signature,
+            blockhash,
+            lastValidBlockHeight
+          },
+          commitment
+        );
+      }
+    };
+  } catch (error) {
+    console.error('Withdraw transaction failed:', error);
+    throw error;
+  }
+}
