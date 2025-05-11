@@ -11,7 +11,7 @@ import {
     getAssociatedTokenAddressSync 
   } from "@solana/spl-token";
   import { 
-    PROGRAM_ID, 
+    LOCKUP_PROGRAM_ID, 
     TOKEN_MINT
   } from "../../utils/constants";
   import { 
@@ -43,7 +43,7 @@ import {
     // Derive escrow authority PDA
     const [escrowAuthority] = PublicKey.findProgramAddressSync(
       [Buffer.from("escrow_authority")],
-      PROGRAM_ID
+      LOCKUP_PROGRAM_ID
     );
   
     // Get escrow token account
@@ -107,7 +107,7 @@ import {
     ];
   
     return new TransactionInstruction({
-      programId: PROGRAM_ID,
+      programId: LOCKUP_PROGRAM_ID,
       keys,
       data,
     });
