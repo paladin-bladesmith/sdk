@@ -2,6 +2,10 @@
   "name": "@paladin-bladesmith/sdk",
   "version": "0.1.0",
   "description": "SDK for Paladin programs on Solana",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
