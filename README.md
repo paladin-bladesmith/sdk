@@ -21,27 +21,18 @@ The SDK provides a simple function-based API for interacting with Paladin protoc
 
 ```typescript
 import { lockTokens } from "@paladin-bladesmith/sdk";
-import { Connection } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 
-async function lockMyTokens(wallet, amount) {
-  const connection = new Connection("https://api.mainnet-beta.solana.com");
-  
-  try {
-    const { signature, confirm } = await lockTokens(wallet, connection, amount);
-    console.log("Transaction sent:", signature);
-    
-    // Wait for confirmation
-    await confirm();
-    console.log("Transaction confirmed!");
-  } catch (error) {
-    console.error("Transaction failed:", error);
-  }
-}
+
+const connection = new Connection("https://api.mainnet-beta.solana.com");
+const lockupForPubkey = new PublicKey("..."); // The pubkey to lock PAL for
+
+const { signature, confirm } = await lockTokens(wallet, connection, lockupForPubkey, amount);
 ```
 
 ## API Reference
 
-### `lockTokens(wallet, connection, amount)`
+### `lockTokens(wallet, connection, lockupForPubkey, amount)`
 
 A function for locking tokens using any wallet adapter.
 
@@ -49,6 +40,7 @@ A function for locking tokens using any wallet adapter.
 
 - `wallet`: A wallet adapter with `publicKey` and `sendTransaction` properties
 - `connection`: A Solana Connection instance
+- `lockupForPubkey`: The public key to lock PAL tokens for
 - `amount`: Number of tokens to lock (in tokens, not raw units)
 
 #### Returns
