@@ -2,6 +2,7 @@ import { Connection, PublicKey, VersionedTransaction, Commitment } from '@solana
 import { makeLockupTransaction } from '../actions/lockup/lock';
 import { makeUnlockTransaction } from '../actions/lockup/unlock';
 import { makeWithdrawTransaction } from '../actions/lockup/withdraw';
+import { Wallet } from "@solana/wallet-adapter-react";
 
 /**
  * Interface for wallet adapter like objects that can send transactions
@@ -21,19 +22,19 @@ export interface WalletAdapter {
  * This function provides a simplified, non-React interface for locking tokens
  * similar to the useLockup hook but without React dependencies.
  * 
- * @param wallet Wallet adapter interface with publicKey and sendTransaction
+ * @param wallet Wallet interface with publicKey and sendTransaction
  * @param connection Solana connection
  * @param lockupForPubkey The pubkey to lock PAL for
  * @param amount Amount of tokens to lock (in tokens, not raw units)
  * @returns Object containing signature and confirm function
  */
 export async function lockTokens(
-  wallet: WalletAdapter,
+  wallet: Wallet,
   connection: Connection,
   lockupForPubkey: PublicKey | string,
   amount: number
 ) {
-  if (!wallet.publicKey) {
+  if (!wallet.adapter.publicKey) {
     throw new Error('Wallet not connected');
   }
   
@@ -43,14 +44,14 @@ export async function lockTokens(
     
     // Create the transaction
     const transaction = await makeLockupTransaction(
-      wallet.publicKey,
+      wallet.adapter.publicKey,
       rawAmount,
       connection,
       lockupForPubkey
     );
     
     // Send the transaction through the wallet adapter
-    const signature = await wallet.sendTransaction(transaction, connection);
+    const signature = await wallet.adapter.sendTransaction(transaction, connection);
     
     // Get latest blockhash for transaction confirmation
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
@@ -82,30 +83,30 @@ export async function lockTokens(
  * This function provides a simplified, non-React interface for unlocking tokens
  * similar to lockTokens but without React dependencies.
  * 
- * @param wallet Wallet adapter interface with publicKey and sendTransaction
+ * @param wallet Wallet interface with publicKey and sendTransaction
  * @param connection Solana connection
  * @param lockupAccount The pubkey of the lockup account to unlock
  * @returns Object containing signature and confirm function
  */
 export async function unlockTokens(
-  wallet: WalletAdapter,
+  wallet: Wallet,
   connection: Connection,
   lockupAccount: PublicKey | string
 ) {
-  if (!wallet.publicKey) {
+  if (!wallet.adapter.publicKey) {
     throw new Error('Wallet not connected');
   }
   
   try {
     // Create the transaction
     const transaction = await makeUnlockTransaction(
-      wallet.publicKey,
+      wallet.adapter.publicKey,
       lockupAccount,
       connection
     );
     
     // Send the transaction through the wallet adapter
-    const signature = await wallet.sendTransaction(transaction, connection);
+    const signature = await wallet.adapter.sendTransaction(transaction, connection);
     
     // Get latest blockhash for transaction confirmation
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
@@ -137,30 +138,30 @@ export async function unlockTokens(
  * This function provides a simplified, non-React interface for withdrawing tokens
  * after they have been unlocked.
  * 
- * @param wallet Wallet adapter interface with publicKey and sendTransaction
+ * @param wallet Wallet interface with publicKey and sendTransaction
  * @param connection Solana connection
  * @param lockupAccount The pubkey of the lockup account to withdraw from
  * @returns Object containing signature and confirm function
  */
 export async function withdrawTokensLockup(
-  wallet: WalletAdapter,
+  wallet: Wallet,
   connection: Connection,
   lockupAccount: PublicKey | string
 ) {
-  if (!wallet.publicKey) {
+  if (!wallet.adapter.publicKey) {
     throw new Error('Wallet not connected');
   }
   
   try {
     // Create the transaction
     const transaction = await makeWithdrawTransaction(
-      wallet.publicKey,
+      wallet.adapter.publicKey,
       lockupAccount,
       connection
     );
     
     // Send the transaction through the wallet adapter
-    const signature = await wallet.sendTransaction(transaction, connection);
+    const signature = await wallet.adapter.sendTransaction(transaction, connection);
     
     // Get latest blockhash for transaction confirmation
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();

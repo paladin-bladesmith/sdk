@@ -237,6 +237,8 @@ export async function makeLockupTransaction(
 
   console.log("Message V0 (base64):", Buffer.from(messageV0.serialize()).toString('base64'));
 
+  console.log("working on local");
+
   // Create and sign transaction
   const tx = new VersionedTransaction(messageV0);
   tx.sign([lockupAccount]);

@@ -1,6 +1,6 @@
 {
   "name": "@paladin-bladesmith/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SDK for Paladin programs on Solana",
   "private": false,
   "publishConfig": {
@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@solana/spl-token": "^0.4.9",
+    "@solana/wallet-adapter-react": "^0.15.38",
     "@solana/web3.js": "^1.90.0",
     "borsh": "^2.0.0"
   },
@@ -42,4 +43,4 @@
     "tsup": "^8.3.5",
     "typescript": "^5.3.3"
   }
-} 
+}
