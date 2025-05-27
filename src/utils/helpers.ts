@@ -1,6 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 import { SEED_PREFIX_HOLDER_REWARDS, REWARDS_PROGRAM_ID } from "./constants";
 import idl from "../idls/lockup.json";
+import { Buffer } from "buffer";
 
 /**
  * Retrieves instruction details from the program's IDL
