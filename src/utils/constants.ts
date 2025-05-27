@@ -1,4 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
+import { Buffer } from "buffer";
 
 // Program IDs
 export const PROGRAM_ID = new PublicKey("2fzrtg7ckXTFxjgsXbAWLLvXr4wJK9xfUjJJ69uZ7chb");

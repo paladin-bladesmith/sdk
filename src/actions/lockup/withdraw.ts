@@ -17,6 +17,7 @@ import {
   import { 
     getInstructionDetails 
   } from "../../utils/helpers";
+  import { Buffer } from "buffer";
   
   /**
    * Creates a withdraw instruction for the lockup program

@@ -28,6 +28,7 @@ import {
   serializeInstructionData,
   getInstructionDetails 
 } from "../../utils/helpers";
+import { Buffer } from "buffer";
 
 /**
  * Creates a lockup instruction

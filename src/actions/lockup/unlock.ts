@@ -13,6 +13,7 @@ import {
 import { 
   getInstructionDetails 
 } from "../../utils/helpers";
+import { Buffer } from "buffer";
 
 /**
  * Creates an unlock instruction
