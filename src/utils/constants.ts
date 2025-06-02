@@ -33,7 +33,7 @@ export const LOCKUP_ACCOUNT_SIZE = 160;
 export const LOCKUP_RENT_EXEMPTION = 2_004_480;
 
 // Stake account sizes
-export const VALIDATOR_STAKE_ACCOUNT_SIZE = 200;
+export const VALIDATOR_STAKE_ACCOUNT_SIZE = 152;
 
 // Constants for seed prefixes
 export const SEED_PREFIX_HOLDER_REWARDS = Buffer.from('holder'); 

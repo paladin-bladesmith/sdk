@@ -6,9 +6,30 @@ import {
   TransactionMessage, 
   Connection,
   SystemProgram,
-  Keypair
 } from "@solana/web3.js";
 import { STAKE_PROGRAM_ID, STAKE_CONFIG, VALIDATOR_STAKE_ACCOUNT_SIZE } from "../../../utils/constants";
+
+/**
+ * Derives the validator stake PDA address using the same logic as the Rust program
+ * @param validatorVote The validator vote account public key
+ * @param config The stake config account public key  
+ * @param programId The stake program ID
+ * @returns The PDA address and bump seed
+ */
+function findValidatorStakePda(
+  validatorVote: PublicKey,
+  config: PublicKey, 
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("validator_stake"),
+      validatorVote.toBuffer(),
+      config.toBuffer()
+    ],
+    programId
+  );
+}
 
 /**
  * Creates an initialize instruction for validator staking
@@ -64,20 +85,29 @@ export async function makeValidatorInitializeTransaction(
     throw new Error(`Could not find vote account for validator identity: ${identityStr}`);
   }
   
-  // Generate a new keypair for the validator stake account
-  const validatorStakeAccount = Keypair.generate();
+  // Derive the validator stake PDA using the same seeds as the Rust program
+  const [validatorStakePda] = findValidatorStakePda(
+    validatorVotePubkey,
+    STAKE_CONFIG,
+    STAKE_PROGRAM_ID
+  );
+  
+  console.log("Derived PDA:", validatorStakePda.toBase58());
   
   // Calculate rent exemption for the validator stake account
   const rentExemption = await connection.getMinimumBalanceForRentExemption(VALIDATOR_STAKE_ACCOUNT_SIZE);
   
-  // Create account instruction
-  const createAccountIx = SystemProgram.createAccount({
+  console.log("Rent exemption needed:", rentExemption);
+  
+  // Transfer lamports to the PDA address to make it rent exempt
+  // This should create a system-owned account with 0 space at the PDA address
+  const fundPdaIx = SystemProgram.transfer({
     fromPubkey: pubkey,
-    newAccountPubkey: validatorStakeAccount.publicKey,
+    toPubkey: validatorStakePda,
     lamports: rentExemption,
-    space: VALIDATOR_STAKE_ACCOUNT_SIZE,
-    programId: STAKE_PROGRAM_ID
   });
+  
+  console.log("Transfer instruction created");
   
   // Add compute budget instruction (optional, but provides more compute units if needed)
   const computeBudgetIx = ComputeBudgetProgram.setComputeUnitLimit({
@@ -93,21 +123,21 @@ export async function makeValidatorInitializeTransaction(
 
   const initializeIx = getValidatorInitializeInstruction({
     validatorVotePubkey: validatorVotePubkey,
-    validatorStakePubkey: validatorStakeAccount.publicKey,
+    validatorStakePubkey: validatorStakePda,
   });
+  
+  const instructions = [computeBudgetIx, addPriorityFee, fundPdaIx, initializeIx];
+  console.log("Total instructions:", instructions.length);
   
   // Create a transaction message
   const messageV0 = new TransactionMessage({
     payerKey: pubkey,
     recentBlockhash: blockhash,
-    instructions: [computeBudgetIx, addPriorityFee, createAccountIx, initializeIx]
+    instructions
   }).compileToV0Message();
   
   // Create the versioned transaction
   const tx = new VersionedTransaction(messageV0);
-  
-  // Add the stake account keypair as a signer
-  tx.sign([validatorStakeAccount]);
   
   return tx;
 }
