@@ -2,7 +2,8 @@ import { PublicKey } from "@solana/web3.js";
 import { Buffer } from "buffer";
 
 // Program IDs
-export const PROGRAM_ID = new PublicKey("2fzrtg7ckXTFxjgsXbAWLLvXr4wJK9xfUjJJ69uZ7chb");
+export const LOCKUP_PROGRAM_ID = new PublicKey("2fzrtg7ckXTFxjgsXbAWLLvXr4wJK9xfUjJJ69uZ7chb");
+export const STAKE_PROGRAM_ID = new PublicKey("GQurxHCYQCNfYR37nHNb6ZiLWg3jpbh2fWv2RpzwGqRK");
 export const REWARDS_PROGRAM_ID = new PublicKey("7LdHk6jnrY4kJW79mVXshTzduvgn3yz4hZzHpzTbt7Ph");
 
 // Program addresses
@@ -30,6 +31,9 @@ export const TOKEN_MINT = new PublicKey("HV9WocvHgRAkYAYmNzvBGHgCj2Vg2Z6N7Vffouy
 // Lockup account sizes
 export const LOCKUP_ACCOUNT_SIZE = 160;
 export const LOCKUP_RENT_EXEMPTION = 2_004_480;
+
+// Stake account sizes
+export const VALIDATOR_STAKE_ACCOUNT_SIZE = 200;
 
 // Constants for seed prefixes
 export const SEED_PREFIX_HOLDER_REWARDS = Buffer.from('holder'); 
