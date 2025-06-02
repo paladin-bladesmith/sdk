@@ -1,30 +1,30 @@
 import { 
   PublicKey, 
-  ComputeBudgetProgram, 
-  TransactionInstruction, 
+  // ComputeBudgetProgram, 
+  // TransactionInstruction, 
   VersionedTransaction, 
-  TransactionMessage, 
+  // TransactionMessage, 
   Connection
 } from "@solana/web3.js";
-import { STAKE_PROGRAM_ID } from "../../../utils/constants";
+// import { STAKE_PROGRAM_ID } from "../../../utils/constants";
 
 /**
  * Creates a stake instruction for solstaker staking
  * @param params The stake instruction parameters
  * @returns Transaction instruction for staking through solstaker
  */
-export function getSolstakerStakeInstruction({
-  authority,
-  stakeAccount,
-  amount,
-}: {
-  authority: PublicKey;
-  stakeAccount: PublicKey;
-  amount: number;
-}): TransactionInstruction {
-  // TODO: Implement instruction serialization and account metas
-  throw new Error("getSolstakerStakeInstruction not implemented");
-}
+// export function getSolstakerStakeInstruction({
+//   authority,
+//   stakeAccount,
+//   amount,
+// }: {
+//   authority: PublicKey;
+//   stakeAccount: PublicKey;
+//   amount: number;
+// }): TransactionInstruction {
+//   // TODO: Implement instruction serialization and account metas
+//   throw new Error("getSolstakerStakeInstruction not implemented");
+// }
 
 /**
  * Creates a complete stake transaction for solstaker staking
@@ -35,10 +35,10 @@ export function getSolstakerStakeInstruction({
  * @returns A versioned transaction ready for signing
  */
 export async function makeSolstakerStakeTransaction(
-  account: PublicKey | string,
-  stakeAccount: PublicKey | string,
-  amount: number,
-  connection: Connection
+  _account: PublicKey | string,
+  _stakeAccount: PublicKey | string,
+  _amount: number,
+  _connection: Connection
 ): Promise<VersionedTransaction> {
   // TODO: Implement transaction creation
   throw new Error("makeSolstakerStakeTransaction not implemented");

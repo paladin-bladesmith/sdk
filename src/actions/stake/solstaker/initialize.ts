@@ -1,28 +1,26 @@
 import { 
   PublicKey, 
-  ComputeBudgetProgram, 
-  TransactionInstruction, 
+  // TransactionInstruction, 
   VersionedTransaction, 
-  TransactionMessage, 
   Connection
 } from "@solana/web3.js";
-import { STAKE_PROGRAM_ID } from "../../../utils/constants";
+// import { STAKE_PROGRAM_ID } from "../../../utils/constants";
 
-/**
- * Creates an initialize instruction for solstaker staking
- * @param params The initialize instruction parameters
- * @returns Transaction instruction for initializing solstaker staking
- */
-export function getSolstakerInitializeInstruction({
-  authority,
-  stakePoolPubkey,
-}: {
-  authority: PublicKey;
-  stakePoolPubkey: PublicKey;
-}): TransactionInstruction {
-  // TODO: Implement instruction serialization and account metas
-  throw new Error("getSolstakerInitializeInstruction not implemented");
-}
+// /**
+//  * Creates an initialize instruction for solstaker staking
+//  * @param params The initialize instruction parameters
+//  * @returns Transaction instruction for initializing solstaker staking
+//  */
+// export function getSolstakerInitializeInstruction({
+//   _authority,
+//   _stakePoolPubkey,
+// }: {
+//   _authority: PublicKey;
+//   _stakePoolPubkey: PublicKey;
+// }): TransactionInstruction {
+//   // TODO: Implement instruction serialization and account metas
+//   throw new Error("getSolstakerInitializeInstruction not implemented");
+// }
 
 /**
  * Creates a complete initialize transaction for solstaker staking
@@ -32,9 +30,9 @@ export function getSolstakerInitializeInstruction({
  * @returns A versioned transaction ready for signing
  */
 export async function makeSolstakerInitializeTransaction(
-  account: PublicKey | string,
-  stakePoolPubkey: PublicKey | string,
-  connection: Connection
+  _account: PublicKey | string,
+  _stakePoolPubkey: PublicKey | string,
+  _connection: Connection
 ): Promise<VersionedTransaction> {
   // TODO: Implement transaction creation
   throw new Error("makeSolstakerInitializeTransaction not implemented");

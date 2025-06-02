@@ -1,30 +1,30 @@
 import { 
   PublicKey, 
-  ComputeBudgetProgram, 
-  TransactionInstruction, 
+  // ComputeBudgetProgram, 
+  // TransactionInstruction, 
   VersionedTransaction, 
-  TransactionMessage, 
+  // TransactionMessage, 
   Connection
 } from "@solana/web3.js";
-import { STAKE_PROGRAM_ID } from "../../../utils/constants";
+// import { STAKE_PROGRAM_ID } from "../../../utils/constants";
 
-/**
- * Creates a stake instruction for validator staking
- * @param params The stake instruction parameters
- * @returns Transaction instruction for staking to a validator
- */
-export function getValidatorStakeInstruction({
-  authority,
-  stakeAccount,
-  amount,
-}: {
-  authority: PublicKey;
-  stakeAccount: PublicKey;
-  amount: number;
-}): TransactionInstruction {
-  // TODO: Implement instruction serialization and account metas
-  throw new Error("getValidatorStakeInstruction not implemented");
-}
+// /**
+//  * Creates a stake instruction for validator staking
+//  * @param params The stake instruction parameters
+//  * @returns Transaction instruction for staking to a validator
+//  */
+// export function getValidatorStakeInstruction({
+//   authority,
+//   stakeAccount,
+//   amount,
+// }: {
+//   authority: PublicKey;
+//   stakeAccount: PublicKey;
+//   amount: number;
+// }): TransactionInstruction {
+//   // TODO: Implement instruction serialization and account metas
+//   throw new Error("getValidatorStakeInstruction not implemented");
+// }
 
 /**
  * Creates a complete stake transaction for validator staking
@@ -35,10 +35,10 @@ export function getValidatorStakeInstruction({
  * @returns A versioned transaction ready for signing
  */
 export async function makeValidatorStakeTransaction(
-  account: PublicKey | string,
-  stakeAccount: PublicKey | string,
-  amount: number,
-  connection: Connection
+  _account: PublicKey | string,
+  _stakeAccount: PublicKey | string,
+  _amount: number,
+  _connection: Connection
 ): Promise<VersionedTransaction> {
   // TODO: Implement transaction creation
   throw new Error("makeValidatorStakeTransaction not implemented");

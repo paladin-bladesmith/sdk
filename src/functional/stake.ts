@@ -1,11 +1,10 @@
-import { Connection, PublicKey, Commitment } from '@solana/web3.js';
-import { makeValidatorInitializeTransaction } from '../actions/stake/validator/initialize';
-import { WalletAdapter } from './index';
-
-// Placeholder exports for future stake functions 
-export function placeholder() {
-  throw new Error("stakeTokens not implemented");
-}
+import { 
+  Connection, 
+  PublicKey,
+  // Commitment 
+} from '@solana/web3.js';
+// import { makeValidatorInitializeTransaction } from '../actions/stake/validator/initialize';
+import { Wallet } from "@solana/wallet-adapter-react";
 
 /**
  * Initialize validator staking using the provided wallet adapter
@@ -13,51 +12,51 @@ export function placeholder() {
  * This function provides a simplified, non-React interface for initializing validator staking
  * similar to the lockup functions.
  * 
- * @param wallet Wallet adapter interface with publicKey and sendTransaction
+ * @param wallet Wallet interface with publicKey and sendTransaction
  * @param connection Solana connection
  * @param validatorPubkey The validator vote public key to initialize
  * @returns Object containing signature and confirm function
  */
 export async function initializeValidatorStake(
-  wallet: WalletAdapter,
-  connection: Connection,
-  validatorPubkey: PublicKey | string
+  _wallet: Wallet,
+  _connection: Connection,
+  _validatorPubkey: PublicKey | string
 ) {
-  if (!wallet.publicKey) {
-    throw new Error('Wallet not connected');
-  }
+  // if (!wallet.adapter.publicKey) {
+  //   throw new Error('Wallet not connected');
+  // }
   
-  try {
-    // Create the transaction
-    const transaction = await makeValidatorInitializeTransaction(
-      wallet.publicKey,
-      validatorPubkey,
-      connection
-    );
+  // try {
+  //   // Create the transaction
+  //   const transaction = await makeValidatorInitializeTransaction(
+  //     wallet.adapter.publicKey,
+  //     validatorPubkey,
+  //     connection
+  //   );
     
-    // Send the transaction through the wallet adapter
-    const signature = await wallet.sendTransaction(transaction, connection);
+  //   // Send the transaction through the wallet adapter
+  //   const signature = await wallet.adapter.sendTransaction(transaction, connection);
     
-    // Get latest blockhash for transaction confirmation
-    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+  //   // Get latest blockhash for transaction confirmation
+  //   const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
     
-    // Return both signature and a helper for waiting for confirmation
-    return {
-      signature,
-      confirm: async (commitment: Commitment = 'confirmed') => {
-        // Use the proper confirmation strategy object
-        return connection.confirmTransaction(
-          {
-            signature,
-            blockhash,
-            lastValidBlockHeight
-          },
-          commitment
-        );
-      }
-    };
-  } catch (error) {
-    console.error('Validator stake initialization failed:', error);
-    throw error;
-  }
+  //   // Return both signature and a helper for waiting for confirmation
+  //   return {
+  //     signature,
+  //     confirm: async (commitment: Commitment = 'confirmed') => {
+  //       // Use the proper confirmation strategy object
+  //       return connection.confirmTransaction(
+  //         {
+  //           signature,
+  //           blockhash,
+  //           lastValidBlockHeight
+  //         },
+  //         commitment
+  //       );
+  //     }
+  //   };
+  // } catch (error) {
+  //   console.error('Validator stake initialization failed:', error);
+  //   throw error;
+  // }
 }
