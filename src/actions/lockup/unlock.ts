@@ -7,7 +7,7 @@ import {
   Connection
 } from "@solana/web3.js";
 import { 
-  PROGRAM_ID, 
+  LOCKUP_PROGRAM_ID,    
   LOCKUP_POOL
 } from "../../utils/constants";
 import { 
@@ -58,7 +58,7 @@ export function getUnlockInstruction({
   ];
 
   return new TransactionInstruction({
-    programId: PROGRAM_ID,
+    programId: LOCKUP_PROGRAM_ID,
     keys,
     data,
   });

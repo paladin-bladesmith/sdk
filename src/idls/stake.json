@@ -1,0 +1,719 @@
+{
+    "version": "0.0.1",
+    "name": "paladin_stake_program",
+    "instructions": [
+      {
+        "name": "InitializeValidatorStake",
+        "accounts": [
+          {
+            "name": "config",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Stake config account"
+            ]
+          },
+          {
+            "name": "validatorStake",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Validator stake account"
+            ]
+          },
+          {
+            "name": "validatorVote",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Validator vote account"
+            ]
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "System program"
+            ]
+          }
+        ],
+        "args": [],
+        "discriminant": {
+          "type": "u8",
+          "value": 1
+        }
+      },
+      {
+        "name": "ValidatorStakeTokens",
+        "accounts": [
+          {
+            "name": "config",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Stake config account"
+            ]
+          },
+          {
+            "name": "validatorStake",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Validator stake account"
+            ]
+          },
+          {
+            "name": "validatorStakeAuthority",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Validator stake account"
+            ]
+          },
+          {
+            "name": "sourceTokenAccount",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Token account"
+            ]
+          },
+          {
+            "name": "sourceTokenAccountAuthority",
+            "isMut": false,
+            "isSigner": true,
+            "docs": [
+              "Owner or delegate of the token account"
+            ]
+          },
+          {
+            "name": "mint",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Stake Token Mint"
+            ]
+          },
+          {
+            "name": "vault",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Stake token Vault"
+            ]
+          },
+          {
+            "name": "vaultHolderRewards",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Holder rewards for the vault account (to facilitate harvest)"
+            ]
+          },
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Token program"
+            ]
+          }
+        ],
+        "args": [
+          {
+            "name": "args",
+            "type": "u64"
+          }
+        ],
+        "discriminant": {
+          "type": "u8",
+          "value": 2
+        }
+      },
+      {
+        "name": "InitializeSolStakerStake",
+        "accounts": [
+          {
+            "name": "config",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Stake config"
+            ]
+          },
+          {
+            "name": "solStakerStake",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Sol staker stake"
+            ]
+          },
+          {
+            "name": "solStakerAuthorityOverride",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Sol staker authority override"
+            ]
+          },
+          {
+            "name": "validatorStake",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Validator stake"
+            ]
+          },
+          {
+            "name": "solStakerNativeStake",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Sol staker native stake"
+            ]
+          },
+          {
+            "name": "sysvarStakeHistory",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Sysvar stake history"
+            ]
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "System program"
+            ]
+          },
+          {
+            "name": "solStakeViewProgram",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Paladin SOL Stake View program"
+            ]
+          }
+        ],
+        "args": [],
+        "discriminant": {
+          "type": "u8",
+          "value": 8
+        }
+      },
+      {
+        "name": "SolStakerStakeTokens",
+        "accounts": [
+          {
+            "name": "config",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Stake config account"
+            ]
+          },
+          {
+            "name": "solStakerStake",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "SOL staker stake account"
+            ]
+          },
+          {
+            "name": "solStakerStakeAuthority",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "SOL staker stake authority account"
+            ]
+          },
+          {
+            "name": "sourceTokenAccount",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Token account"
+            ]
+          },
+          {
+            "name": "sourceTokenAccountAuthority",
+            "isMut": false,
+            "isSigner": true,
+            "docs": [
+              "Owner or delegate of the token account"
+            ]
+          },
+          {
+            "name": "mint",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Stake Token Mint"
+            ]
+          },
+          {
+            "name": "vault",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Stake token Vault"
+            ]
+          },
+          {
+            "name": "vaultHolderRewards",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Stake token Vault"
+            ]
+          },
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Token program"
+            ]
+          }
+        ],
+        "args": [
+          {
+            "name": "args",
+            "type": "u64"
+          }
+        ],
+        "discriminant": {
+          "type": "u8",
+          "value": 9
+        }
+      },
+      {
+        "name": "UnstakeTokens",
+        "accounts": [
+          {
+            "name": "config",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Stake config account"
+            ]
+          },
+          {
+            "name": "stake",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Sol staker/validator stake account"
+            ]
+          },
+          {
+            "name": "stakeAuthority",
+            "isMut": true,
+            "isSigner": true,
+            "docs": [
+              "Stake authority account"
+            ]
+          },
+          {
+            "name": "vault",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Vault account"
+            ]
+          },
+          {
+            "name": "vaultAuthority",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Vault authority"
+            ]
+          },
+          {
+            "name": "vaultHolderRewards",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Vault holder rewards account"
+            ]
+          },
+          {
+            "name": "mint",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Mint account"
+            ]
+          },
+          {
+            "name": "destinationTokenAccount",
+            "isMut": true,
+            "isSigner": false,
+            "docs": [
+              "Destination token account"
+            ]
+          },
+          {
+            "name": "tokenProgram",
+            "isMut": false,
+            "isSigner": false,
+            "docs": [
+              "Token program"
+            ]
+          }
+        ],
+        "args": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ],
+        "discriminant": {
+          "type": "u8",
+          "value": 11
+        }
+      }
+    ],
+    "accounts": [
+      {
+        "name": "Config",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "discriminator",
+              "type": {
+                "array": [
+                  "u8",
+                  8
+                ]
+              }
+            },
+            {
+              "name": "authority",
+              "type": {
+                "defined": "OptionalNonZeroPubkey"
+              }
+            },
+            {
+              "name": "slashAuthority",
+              "type": {
+                "defined": "OptionalNonZeroPubkey"
+              }
+            },
+            {
+              "name": "vault",
+              "type": "publicKey"
+            },
+            {
+              "name": "cooldownTimeSeconds",
+              "type": "u64"
+            },
+            {
+              "name": "tokenAmountEffective",
+              "type": "u64"
+            },
+            {
+              "name": "syncRewardsLamports",
+              "type": "u64"
+            },
+            {
+              "name": "lamportsLast",
+              "type": "u64"
+            },
+            {
+              "name": "accumulatedStakeRewardsPerToken",
+              "type": {
+                "defined": "PodU128"
+              }
+            },
+            {
+              "name": "maxDeactivationBasisPoints",
+              "type": "u16"
+            },
+            {
+              "name": "vaultAuthorityBump",
+              "type": "u8"
+            },
+            {
+              "name": "padding",
+              "type": {
+                "array": [
+                  "u8",
+                  5
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "SolStakerStake",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "discriminator",
+              "type": {
+                "array": [
+                  "u8",
+                  8
+                ]
+              }
+            },
+            {
+              "name": "delegation",
+              "type": {
+                "defined": "Delegation"
+              }
+            },
+            {
+              "name": "lamportsAmount",
+              "type": "u64"
+            },
+            {
+              "name": "solStake",
+              "type": "publicKey"
+            }
+          ]
+        }
+      },
+      {
+        "name": "ValidatorStake",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "discriminator",
+              "type": {
+                "array": [
+                  "u8",
+                  8
+                ]
+              }
+            },
+            {
+              "name": "delegation",
+              "type": {
+                "defined": "Delegation"
+              }
+            },
+            {
+              "name": "totalStakedLamportsAmount",
+              "type": "u64"
+            },
+            {
+              "name": "totalStakedLamportsAmountMin",
+              "type": "u64"
+            }
+          ]
+        }
+      }
+    ],
+    "types": [
+      {
+        "name": "Delegation",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "stakedAmount",
+              "type": "u64"
+            },
+            {
+              "name": "effectiveAmount",
+              "type": "u64"
+            },
+            {
+              "name": "unstakeCooldown",
+              "type": "u64"
+            },
+            {
+              "name": "authority",
+              "type": "publicKey"
+            },
+            {
+              "name": "validatorVote",
+              "type": "publicKey"
+            },
+            {
+              "name": "lastSeenHolderRewardsPerToken",
+              "type": {
+                "defined": "PodU128"
+              }
+            },
+            {
+              "name": "lastSeenStakeRewardsPerToken",
+              "type": {
+                "defined": "PodU128"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "AuthorityType",
+        "type": {
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "Config"
+            },
+            {
+              "name": "Slash"
+            }
+          ]
+        }
+      },
+      {
+        "name": "ConfigField",
+        "type": {
+          "kind": "enum",
+          "variants": [
+            {
+              "name": "CooldownTimeSeconds",
+              "fields": [
+                "u64"
+              ]
+            },
+            {
+              "name": "MaxDeactivationBasisPoints",
+              "fields": [
+                "u16"
+              ]
+            },
+            {
+              "name": "SyncRewardsLamports",
+              "fields": [
+                "u64"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "errors": [
+      {
+        "code": 0,
+        "name": "AmountGreaterThanZero",
+        "msg": "Amount cannot be greater than zero"
+      },
+      {
+        "code": 1,
+        "name": "InvalidTokenOwner",
+        "msg": "Invalid token owner"
+      },
+      {
+        "code": 2,
+        "name": "InvalidTransferHookProgramId",
+        "msg": "Invalid transfer hook program id"
+      },
+      {
+        "code": 3,
+        "name": "InvalidAccountDataLength",
+        "msg": "Invalid account data length"
+      },
+      {
+        "code": 4,
+        "name": "InvalidMint",
+        "msg": "Invalid mint"
+      },
+      {
+        "code": 5,
+        "name": "MissingTransferHook",
+        "msg": "Missing transfer hook"
+      },
+      {
+        "code": 6,
+        "name": "CloseAuthorityNotNone",
+        "msg": "Close authority must be none"
+      },
+      {
+        "code": 7,
+        "name": "DelegateNotNone",
+        "msg": "Delegate must be none"
+      },
+      {
+        "code": 8,
+        "name": "InvalidTokenAccountExtension",
+        "msg": "Invalid token account extension"
+      },
+      {
+        "code": 9,
+        "name": "InvalidAuthority",
+        "msg": "Invalid authority"
+      },
+      {
+        "code": 10,
+        "name": "AuthorityNotSet",
+        "msg": "Authority is not set"
+      },
+      {
+        "code": 11,
+        "name": "InsufficientStakeAmount",
+        "msg": "Amount greater than stake amount"
+      },
+      {
+        "code": 12,
+        "name": "InvalidAmount",
+        "msg": "Amount should be greater than 0"
+      },
+      {
+        "code": 13,
+        "name": "MaximumDeactivationAmountExceeded",
+        "msg": "Amount exeeds maximum deactivation amount"
+      },
+      {
+        "code": 14,
+        "name": "ActiveUnstakeCooldown",
+        "msg": "Active unstake cooldown"
+      },
+      {
+        "code": 15,
+        "name": "IncorrectVaultAccount",
+        "msg": "Incorrect vault account"
+      },
+      {
+        "code": 16,
+        "name": "InvalidDestinationAccount",
+        "msg": "Invalid destination account"
+      },
+      {
+        "code": 17,
+        "name": "InvalidSlashAmount",
+        "msg": "Invalid slash amount"
+      },
+      {
+        "code": 18,
+        "name": "UndelegatedSolStakeAccount",
+        "msg": "Undelegated SOL stake account"
+      },
+      {
+        "code": 19,
+        "name": "TotalStakeAmountExceedsSolLimit",
+        "msg": "Total stake amount exceeds SOL limit"
+      },
+      {
+        "code": 20,
+        "name": "IncorrectSolStakeAccount",
+        "msg": "Incorrect SOL stake account"
+      },
+      {
+        "code": 21,
+        "name": "InvalidHolderRewards",
+        "msg": "Invalid holder rewards"
+      }
+    ],
+    "metadata": {
+      "origin": "shank",
+      "address": "GQurxHCYQCNfYR37nHNb6ZiLWg3jpbh2fWv2RpzwGqRK",
+      "binaryVersion": "0.4.2",
+      "libVersion": "^0.4.2"
+    }
+  }

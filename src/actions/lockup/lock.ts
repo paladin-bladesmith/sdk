@@ -13,7 +13,7 @@ import {
   getAssociatedTokenAddressSync 
 } from "@solana/spl-token";
 import { 
-  PROGRAM_ID, 
+  LOCKUP_PROGRAM_ID, 
   TOKEN_MINT, 
   LOCKUP_ACCOUNT_SIZE, 
   LOCKUP_RENT_EXEMPTION,
@@ -59,7 +59,7 @@ export function getLockupInstruction({
   // Derive escrow authority PDA
   const [escrowAuthority] = PublicKey.findProgramAddressSync(
     [Buffer.from("escrow_authority")],
-    PROGRAM_ID
+    LOCKUP_PROGRAM_ID
   );
 
   // Get associated token accounts
@@ -166,7 +166,7 @@ export function getLockupInstruction({
   ];
 
   return new TransactionInstruction({
-    programId: PROGRAM_ID,
+    programId: LOCKUP_PROGRAM_ID,
     keys,
     data,
   });
@@ -201,7 +201,7 @@ export async function makeLockupTransaction(
     newAccountPubkey: lockupAccount.publicKey,
     lamports: LOCKUP_RENT_EXEMPTION,
     space: LOCKUP_ACCOUNT_SIZE,
-    programId: PROGRAM_ID
+    programId: LOCKUP_PROGRAM_ID
   });
 
   // Get lockup instruction
