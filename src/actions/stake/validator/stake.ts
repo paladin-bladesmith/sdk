@@ -18,30 +18,8 @@ import {
   PAL_MINT
 } from "../../../utils/constants";
 import { getStakeInstructionDetails } from "../../../utils/helpers";
-import { getValidatorVoteAccount } from "./initialize";
+import { findValidatorStakePda, getValidatorVoteAccount } from "./utils";
 import { Buffer } from "buffer";
-
-/**
- * Derives the validator stake PDA address using the same logic as the Rust program
- * @param validatorVote The validator vote account public key
- * @param config The stake config account public key  
- * @param programId The stake program ID
- * @returns The PDA address and bump seed
- */
-function findValidatorStakePda(
-  validatorVote: PublicKey,
-  config: PublicKey, 
-  programId: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("validator_stake"),
-      validatorVote.toBuffer(),
-      config.toBuffer()
-    ],
-    programId
-  );
-}
 
 /**
  * Creates a stake instruction for validator staking
