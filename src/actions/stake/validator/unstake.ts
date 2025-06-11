@@ -17,6 +17,7 @@ import { getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID } from "@solana/sp
 import { Buffer } from "buffer";
 import { findValidatorStakePda, getValidatorVoteAccount } from "./utils";
 import { findVaultAuthorityPda } from "../utils";
+import { getStakeInstructionDetails } from "../../../utils/helpers";
 
 /**
  * Creates an unstake instruction for validator staking
@@ -34,8 +35,11 @@ function getValidatorUnstakeInstruction({
   destinationTokenAccount: PublicKey;
   amount: bigint;
 }): TransactionInstruction {
-  // Create the instruction buffer with the discriminant value (11) and amount
-  const discriminantBuffer = Buffer.from([11]); // Discriminant value from IDL
+  // Get instruction details from IDL
+  const instruction = getStakeInstructionDetails("UnstakeTokens");
+  
+  // Create the instruction buffer with the discriminant value from IDL and amount
+  const discriminantBuffer = Buffer.from([instruction.discriminant.value]);
   const amountBuffer = Buffer.allocUnsafe(8);
   amountBuffer.writeBigUInt64LE(amount);
   const data = Buffer.concat([discriminantBuffer, amountBuffer]);
