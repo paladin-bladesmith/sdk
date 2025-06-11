@@ -26,7 +26,7 @@ import {
 import { 
   getHolderRewardsAddress, 
   serializeInstructionData,
-  getInstructionDetails 
+  getLockupInstructionDetails 
 } from "../../utils/helpers";
 import { Buffer } from "buffer";
 
@@ -47,7 +47,7 @@ export function getLockupInstruction({
   amount: number;
 }): TransactionInstruction {
   // Get instruction details from IDL
-  const instruction = getInstructionDetails("Lockup");
+  const instruction = getLockupInstructionDetails("Lockup");
   
   // Serialize instruction data
   const data = serializeInstructionData(

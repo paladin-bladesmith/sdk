@@ -11,7 +11,7 @@ import {
   LOCKUP_POOL
 } from "../../utils/constants";
 import { 
-  getInstructionDetails 
+  getLockupInstructionDetails 
 } from "../../utils/helpers";
 import { Buffer } from "buffer";
 
@@ -30,7 +30,7 @@ export function getUnlockInstruction({
   lockupPool: PublicKey;
 }): TransactionInstruction {
   // Get instruction details from IDL
-  const instruction = getInstructionDetails("Unlock");
+  const instruction = getLockupInstructionDetails("Unlock");
   
   // Serialize instruction data
   const data = Buffer.from([instruction.discriminant.value]);
