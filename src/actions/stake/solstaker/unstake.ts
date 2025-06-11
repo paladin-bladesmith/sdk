@@ -70,26 +70,26 @@ function getSolStakerUnstakeInstruction({
 /**
  * Creates a complete unstake transaction for sol staker staking
  * @param account The wallet public key or address string
- * @param solStakerNativeStakeKey The SOL staker native stake account public key
+ * @param solStakerStakeKey The SOL staker stake account public key
  * @param amount The amount of tokens to unstake
  * @param connection Solana connection instance
  * @returns A versioned transaction ready for signing
  */
 export async function makeSolStakerUnstakeTransaction(
   account: PublicKey | string,
-  solStakerNativeStakeKey: PublicKey | string,
+  solStakerStakeKey: PublicKey | string,
   amount: bigint,
   connection: Connection
 ): Promise<VersionedTransaction> {
   // Convert string to PublicKey if necessary
   const pubkey = typeof account === 'string' ? new PublicKey(account) : account;
-  const solStakerNativeStake = typeof solStakerNativeStakeKey === 'string' 
-    ? new PublicKey(solStakerNativeStakeKey) 
-    : solStakerNativeStakeKey;
+  const solStakerStake = typeof solStakerStakeKey === 'string' 
+    ? new PublicKey(solStakerStakeKey) 
+    : solStakerStakeKey;
   
   // Derive the sol staker stake PDA using the same pattern as validator staking
   const [solStakerStakePda] = findSolStakerStakePda(
-    solStakerNativeStake,
+    solStakerStake,
     STAKE_CONFIG,
     STAKE_PROGRAM_ID
   );
