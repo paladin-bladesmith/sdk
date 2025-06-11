@@ -182,12 +182,14 @@ export async function unstakeValidatorTokens(
  * 
  * @param wallet Wallet interface with publicKey and sendTransaction
  * @param connection Solana connection
+ * @param solStakerNativeStake The SOL staker native stake account public key
  * @param amount The amount of tokens to unstake (as a bigint)
  * @returns Object containing signature and confirm function
  */
 export async function unstakeSolStakerTokens(
   wallet: Wallet,
   connection: Connection,
+  solStakerNativeStake: PublicKey | string,
   amount: bigint
 ) {
   if (!wallet.adapter.publicKey) {
@@ -198,6 +200,7 @@ export async function unstakeSolStakerTokens(
     // Create the transaction
     const transaction = await makeSolStakerUnstakeTransaction(
       wallet.adapter.publicKey,
+      solStakerNativeStake,
       amount,
       connection
     );

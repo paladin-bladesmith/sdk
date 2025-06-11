@@ -68,59 +68,26 @@ function getSolStakerUnstakeInstruction({
 }
 
 /**
- * Gets all SOL stake accounts for a given authority
- * @param connection Solana connection instance
- * @param authority The authority public key
- * @returns Array of SOL stake account public keys
- */
-async function getSolStakeAccountsForAuthority(
-  connection: Connection,
-  authority: PublicKey
-): Promise<PublicKey[]> {
-  const programAccounts = await connection.getProgramAccounts(
-    new PublicKey("Stake11111111111111111111111111111111111111"), // Native stake program
-    {
-      filters: [
-        {
-          memcmp: {
-            offset: 12, // Offset for authorized staker
-            bytes: authority.toBase58()
-          }
-        }
-      ]
-    }
-  );
-  
-  return programAccounts.map(account => account.pubkey);
-}
-
-/**
  * Creates a complete unstake transaction for sol staker staking
  * @param account The wallet public key or address string
+ * @param solStakerNativeStakeKey The SOL staker native stake account public key
  * @param amount The amount of tokens to unstake
  * @param connection Solana connection instance
  * @returns A versioned transaction ready for signing
  */
 export async function makeSolStakerUnstakeTransaction(
   account: PublicKey | string,
+  solStakerNativeStakeKey: PublicKey | string,
   amount: bigint,
   connection: Connection
 ): Promise<VersionedTransaction> {
   // Convert string to PublicKey if necessary
   const pubkey = typeof account === 'string' ? new PublicKey(account) : account;
+  const solStakerNativeStake = typeof solStakerNativeStakeKey === 'string' 
+    ? new PublicKey(solStakerNativeStakeKey) 
+    : solStakerNativeStakeKey;
   
-  // Get all SOL stake accounts for this authority
-  const solStakeAccounts = await getSolStakeAccountsForAuthority(connection, pubkey);
-  
-  if (solStakeAccounts.length === 0) {
-    throw new Error(`No SOL stake accounts found for authority: ${pubkey.toBase58()}`);
-  }
-  
-  // For now, we'll use the first SOL stake account
-  // In a real implementation, you might want to let the user choose or have additional logic
-  const solStakerNativeStake = solStakeAccounts[0];
-  
-  // Derive the sol staker stake PDA
+  // Derive the sol staker stake PDA using the same pattern as validator staking
   const [solStakerStakePda] = findSolStakerStakePda(
     solStakerNativeStake,
     STAKE_CONFIG,
