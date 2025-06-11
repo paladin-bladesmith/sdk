@@ -1,6 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 import { SEED_PREFIX_HOLDER_REWARDS, REWARDS_PROGRAM_ID } from "./constants";
-import idl from "../idls/lockup.json";
+import lockupIdl from "../idls/lockup.json";
+import stakeIdl from "../idls/stake.json";
 import { Buffer } from "buffer";
 
 /**
@@ -9,12 +10,28 @@ import { Buffer } from "buffer";
  * @returns The instruction details from the IDL
  */
 export const getInstructionDetails = (name: string) => {
-  const instruction = idl.instructions.find((ix: any) => ix.name === name);
+  const instruction = lockupIdl.instructions.find((ix: any) => ix.name === name);
 
   console.log("Instruction details:", instruction);
 
   if (!instruction) {
     throw new Error(`Instruction ${name} not found in IDL`);
+  }
+  return instruction;
+};
+
+/**
+ * Retrieves stake instruction details from the stake program's IDL
+ * @param name The instruction name to find
+ * @returns The instruction details from the stake IDL
+ */
+export const getStakeInstructionDetails = (name: string) => {
+  const instruction = stakeIdl.instructions.find((ix: any) => ix.name === name);
+
+  console.log("Stake instruction details:", instruction);
+
+  if (!instruction) {
+    throw new Error(`Instruction ${name} not found in stake IDL`);
   }
   return instruction;
 };
