@@ -15,47 +15,8 @@ import {
 } from "../../../utils/constants";
 import { getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { Buffer } from "buffer";
-
-/**
- * Derives the validator stake PDA address using the same logic as the Rust program
- * @param validatorVote The validator vote account public key
- * @param config The stake config account public key  
- * @param programId The stake program ID
- * @returns The PDA address and bump seed
- */
-function findValidatorStakePda(
-  validatorVote: PublicKey,
-  config: PublicKey, 
-  programId: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("validator_stake"),
-      validatorVote.toBuffer(),
-      config.toBuffer()
-    ],
-    programId
-  );
-}
-
-/**
- * Derives the vault authority PDA
- * @param vault The vault public key
- * @param programId The stake program ID
- * @returns The PDA address and bump seed
- */
-function findVaultAuthorityPda(
-  vault: PublicKey,
-  programId: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("vault_authority"),
-      vault.toBuffer()
-    ],
-    programId
-  );
-}
+import { findValidatorStakePda, getValidatorVoteAccount } from "./utils";
+import { findVaultAuthorityPda } from "../utils";
 
 /**
  * Creates an unstake instruction for validator staking
@@ -116,9 +77,6 @@ export async function makeValidatorUnstakeTransaction(
   amount: bigint,
   connection: Connection
 ): Promise<VersionedTransaction> {
-  // Import the helper function from initialize.ts
-  const { getValidatorVoteAccount } = await import('./initialize');
-  
   // Convert string to PublicKey if necessary
   const pubkey = typeof account === 'string' ? new PublicKey(account) : account;
   

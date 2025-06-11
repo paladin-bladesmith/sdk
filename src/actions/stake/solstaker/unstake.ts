@@ -15,47 +15,8 @@ import {
 } from "../../../utils/constants";
 import { getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { Buffer } from "buffer";
-
-/**
- * Derives the sol staker stake PDA address
- * @param solStakerNativeStake The sol staker native stake account
- * @param config The stake config account public key  
- * @param programId The stake program ID
- * @returns The PDA address and bump seed
- */
-function findSolStakerStakePda(
-  solStakerNativeStake: PublicKey,
-  config: PublicKey, 
-  programId: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("sol_staker_stake"),
-      solStakerNativeStake.toBuffer(),
-      config.toBuffer()
-    ],
-    programId
-  );
-}
-
-/**
- * Derives the vault authority PDA
- * @param vault The vault public key
- * @param programId The stake program ID
- * @returns The PDA address and bump seed
- */
-function findVaultAuthorityPda(
-  vault: PublicKey,
-  programId: PublicKey
-): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("vault_authority"),
-      vault.toBuffer()
-    ],
-    programId
-  );
-}
+import { findSolStakerStakePda } from "./utils";
+import { findVaultAuthorityPda } from "../utils";
 
 /**
  * Creates an unstake instruction for sol staker staking
