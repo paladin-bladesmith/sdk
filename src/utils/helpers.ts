@@ -5,17 +5,17 @@ import stakeIdl from "../idls/stake.json";
 import { Buffer } from "buffer";
 
 /**
- * Retrieves instruction details from the program's IDL
+ * Retrieves lockup instruction details from the lockup program's IDL
  * @param name The instruction name to find
- * @returns The instruction details from the IDL
+ * @returns The instruction details from the lockup IDL
  */
-export const getInstructionDetails = (name: string) => {
+export const getLockupInstructionDetails = (name: string) => {
   const instruction = lockupIdl.instructions.find((ix: any) => ix.name === name);
 
-  console.log("Instruction details:", instruction);
+  console.log("Lockup instruction details:", instruction);
 
   if (!instruction) {
-    throw new Error(`Instruction ${name} not found in IDL`);
+    throw new Error(`Instruction ${name} not found in lockup IDL`);
   }
   return instruction;
 };
