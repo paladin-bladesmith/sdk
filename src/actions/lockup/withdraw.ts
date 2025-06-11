@@ -12,9 +12,14 @@ import {
   } from "@solana/spl-token";
   import { 
     LOCKUP_PROGRAM_ID, 
-    TOKEN_MINT
+    TOKEN_MINT,
+    EXTRA_ACCOUNT_METAS,
+    HOLDER_REWARDS_POOL,
+    RECIPIENT_REWARDS,
+    REWARDS_PROGRAM_ID
   } from "../../utils/constants";
   import { 
+    getHolderRewardsAddress,
     getLockupInstructionDetails 
   } from "../../utils/helpers";
   import { Buffer } from "buffer";
@@ -102,6 +107,36 @@ import {
       // #8 Token Program
       {
         pubkey: TOKEN_2022_PROGRAM_ID,
+        isSigner: false,
+        isWritable: false
+      },
+      // #9-13 Extra accounts for token 22 transfer
+      {
+        pubkey: EXTRA_ACCOUNT_METAS,
+        isSigner: false,
+        isWritable: false
+      },
+      // #10 Holder Rewards Pool
+      {
+        pubkey: HOLDER_REWARDS_POOL,
+        isSigner: false, 
+        isWritable: true
+      },
+      // #11 Holder Rewards Account
+      {
+        pubkey: getHolderRewardsAddress(tokenDestination, REWARDS_PROGRAM_ID),
+        isSigner: false, 
+        isWritable: true,
+      },
+      // #12 Recipient Rewards
+      {
+        pubkey: RECIPIENT_REWARDS,
+        isSigner: false,
+        isWritable: true
+      },
+      // #13 Rewards Program
+      {
+        pubkey: REWARDS_PROGRAM_ID,
         isSigner: false,
         isWritable: false
       }
