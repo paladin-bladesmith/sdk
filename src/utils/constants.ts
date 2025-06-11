@@ -14,6 +14,7 @@ export const EXTRA_ACCOUNT_METAS = new PublicKey("B7HWKeRXgzHTfKdh3Ybf4NkizXWGq9
 export const HOLDER_REWARDS_POOL = new PublicKey("9EeBEci7SovWiZpaLM7xzPQpYywa8DY865WmHYRC6vVD");
 export const STAKE_CONFIG = new PublicKey("h4BWpb5mVFxabgskaEdsuDbkNdG3MpbELDdXPdNSkKH");
 export const STAKE_VAULT = new PublicKey("319k4mx787DPAhfe6pssjsz3rLrSC9SxHYfuxbyuzuHo");
+export const STAKE_VAULT_AUTHORITY = new PublicKey("8HCgDDFCwzJnTu2PYjui7yEEgbN3TKtQQ2Sw47ut6gGf");
 export const STAKE_VAULT_HOLDER_REWARDS = new PublicKey("62WN4pmhwbaA14uyVWzPayNQatasoraC7yjHSxBjM9zK");
 export const FUNNEL = new PublicKey("6RfdhWwnNBKwchqPex7RPBw2c8Cku8y4QyUqjX71YoBq");
 export const GOVERNANCE_CONFIG = new PublicKey("Gkv2FpDDPxWeua6N16NwoqryWzSc5izEn31PbRPtH4zV");

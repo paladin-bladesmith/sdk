@@ -7,8 +7,10 @@ import {
   Connection,
   SystemProgram,
 } from "@solana/web3.js";
+import { Buffer } from "buffer";
 import { STAKE_PROGRAM_ID, STAKE_CONFIG, VALIDATOR_STAKE_ACCOUNT_SIZE } from "../../../utils/constants";
 import { findValidatorStakePda, getValidatorVoteAccount } from "./utils";
+import { getStakeInstructionDetails } from "../../../utils/helpers";
 
 /**
  * Creates an initialize instruction for validator staking
@@ -22,8 +24,11 @@ function getValidatorInitializeInstruction({
   validatorVotePubkey: PublicKey;
   validatorStakePubkey: PublicKey;
 }): TransactionInstruction {
-  // Create the instruction buffer with the discriminant value (1)
-  const data = Buffer.from([1]); // Discriminant value from IDL
+  // Get instruction details from IDL
+  const instruction = getStakeInstructionDetails("InitializeValidatorStake");
+  
+  // Create the instruction buffer with the discriminant value from IDL
+  const data = Buffer.from([instruction.discriminant.value]);
 
   // Define account metas based on IDL structure
   const keys = [
