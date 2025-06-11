@@ -4,6 +4,7 @@ import {
   Commitment 
 } from '@solana/web3.js';
 import { makeValidatorInitializeTransaction } from '../actions/stake/validator/initialize';
+import { makeValidatorStakeTokensTransaction } from '../actions/stake/validator/stake';
 import { makeValidatorUnstakeTransaction } from '../actions/stake/validator/unstake';
 import { makeSolStakerUnstakeTransaction } from '../actions/stake/solstaker/unstake';
 import { Wallet } from "@solana/wallet-adapter-react";
@@ -59,6 +60,64 @@ export async function initializeValidatorStake(
     };
   } catch (error) {
     console.error('Validator stake initialization failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * Stake tokens to a validator using the provided wallet adapter
+ * 
+ * This function provides a simplified, non-React interface for staking tokens
+ * to a validator, similar to the initializeValidatorStake function.
+ * 
+ * @param wallet Wallet interface with publicKey and sendTransaction
+ * @param connection Solana connection
+ * @param validatorIdentityPubkey The validator identity public key to stake to
+ * @param amount The amount of tokens to stake (in smallest units)
+ * @returns Object containing signature and confirm function
+ */
+export async function validatorStakeTokens(
+  wallet: Wallet,
+  connection: Connection,
+  validatorIdentityPubkey: PublicKey | string,
+  amount: number
+) {
+  if (!wallet.adapter.publicKey) {
+    throw new Error('Wallet not connected');
+  }
+  
+  try {
+    // Create the transaction
+    const transaction = await makeValidatorStakeTokensTransaction(
+      wallet.adapter.publicKey,
+      validatorIdentityPubkey,
+      amount,
+      connection
+    );
+    
+    // Send the transaction through the wallet adapter
+    const signature = await wallet.adapter.sendTransaction(transaction, connection);
+    
+    // Get latest blockhash for transaction confirmation
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+    
+    // Return both signature and a helper for waiting for confirmation
+    return {
+      signature,
+      confirm: async (commitment: Commitment = 'confirmed') => {
+        // Use the proper confirmation strategy object
+        return connection.confirmTransaction(
+          {
+            signature,
+            blockhash,
+            lastValidBlockHeight
+          },
+          commitment
+        );
+      }
+    };
+  } catch (error) {
+    console.error('Validator stake tokens failed:', error);
     throw error;
   }
 }

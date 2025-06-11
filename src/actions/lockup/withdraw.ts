@@ -15,7 +15,7 @@ import {
     TOKEN_MINT
   } from "../../utils/constants";
   import { 
-    getInstructionDetails 
+    getLockupInstructionDetails 
   } from "../../utils/helpers";
   import { Buffer } from "buffer";
   
@@ -36,7 +36,7 @@ import {
     tokenDestination: PublicKey;
   }): TransactionInstruction {
     // Get instruction details from IDL
-    const instruction = getInstructionDetails("Withdraw");
+    const instruction = getLockupInstructionDetails("Withdraw");
     
     // Serialize instruction data - Withdraw only needs discriminant
     const data = Buffer.from([instruction.discriminant.value]);

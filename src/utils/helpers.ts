@@ -1,20 +1,37 @@
 import { PublicKey } from "@solana/web3.js";
 import { SEED_PREFIX_HOLDER_REWARDS, REWARDS_PROGRAM_ID } from "./constants";
-import idl from "../idls/lockup.json";
+import lockupIdl from "../idls/lockup.json";
+import stakeIdl from "../idls/stake.json";
 import { Buffer } from "buffer";
 
 /**
- * Retrieves instruction details from the program's IDL
+ * Retrieves lockup instruction details from the lockup program's IDL
  * @param name The instruction name to find
- * @returns The instruction details from the IDL
+ * @returns The instruction details from the lockup IDL
  */
-export const getInstructionDetails = (name: string) => {
-  const instruction = idl.instructions.find((ix: any) => ix.name === name);
+export const getLockupInstructionDetails = (name: string) => {
+  const instruction = lockupIdl.instructions.find((ix: any) => ix.name === name);
 
-  console.log("Instruction details:", instruction);
+  console.log("Lockup instruction details:", instruction);
 
   if (!instruction) {
-    throw new Error(`Instruction ${name} not found in IDL`);
+    throw new Error(`Instruction ${name} not found in lockup IDL`);
+  }
+  return instruction;
+};
+
+/**
+ * Retrieves stake instruction details from the stake program's IDL
+ * @param name The instruction name to find
+ * @returns The instruction details from the stake IDL
+ */
+export const getStakeInstructionDetails = (name: string) => {
+  const instruction = stakeIdl.instructions.find((ix: any) => ix.name === name);
+
+  console.log("Stake instruction details:", instruction);
+
+  if (!instruction) {
+    throw new Error(`Instruction ${name} not found in stake IDL`);
   }
   return instruction;
 };
