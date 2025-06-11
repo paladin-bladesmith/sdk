@@ -1,0 +1,205 @@
+import { 
+  PublicKey, 
+  ComputeBudgetProgram, 
+  TransactionInstruction, 
+  VersionedTransaction, 
+  TransactionMessage, 
+  Connection,
+} from "@solana/web3.js";
+import { 
+  STAKE_PROGRAM_ID, 
+  STAKE_CONFIG, 
+  STAKE_VAULT,
+  STAKE_VAULT_HOLDER_REWARDS,
+  PAL_MINT,
+} from "../../../utils/constants";
+import { getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+import { Buffer } from "buffer";
+
+/**
+ * Derives the sol staker stake PDA address
+ * @param solStakerNativeStake The sol staker native stake account
+ * @param config The stake config account public key  
+ * @param programId The stake program ID
+ * @returns The PDA address and bump seed
+ */
+function findSolStakerStakePda(
+  solStakerNativeStake: PublicKey,
+  config: PublicKey, 
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("sol_staker_stake"),
+      solStakerNativeStake.toBuffer(),
+      config.toBuffer()
+    ],
+    programId
+  );
+}
+
+/**
+ * Derives the vault authority PDA
+ * @param vault The vault public key
+ * @param programId The stake program ID
+ * @returns The PDA address and bump seed
+ */
+function findVaultAuthorityPda(
+  vault: PublicKey,
+  programId: PublicKey
+): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("vault_authority"),
+      vault.toBuffer()
+    ],
+    programId
+  );
+}
+
+/**
+ * Creates an unstake instruction for sol staker staking
+ * @param params The unstake instruction parameters
+ * @returns Transaction instruction for unstaking sol staker tokens
+ */
+function getSolStakerUnstakeInstruction({
+  solStakerStakePubkey,
+  stakeAuthority,
+  destinationTokenAccount,
+  amount,
+}: {
+  solStakerStakePubkey: PublicKey;
+  stakeAuthority: PublicKey;
+  destinationTokenAccount: PublicKey;
+  amount: bigint;
+}): TransactionInstruction {
+  // Create the instruction buffer with the discriminant value (11) and amount
+  const discriminantBuffer = Buffer.from([11]); // Discriminant value from IDL
+  const amountBuffer = Buffer.allocUnsafe(8);
+  amountBuffer.writeBigUInt64LE(amount);
+  const data = Buffer.concat([discriminantBuffer, amountBuffer]);
+
+  // Derive vault authority PDA
+  const [vaultAuthority] = findVaultAuthorityPda(STAKE_VAULT, STAKE_PROGRAM_ID);
+
+  // Define account metas based on IDL structure
+  const keys = [
+    { pubkey: STAKE_CONFIG, isSigner: false, isWritable: true }, // config
+    { pubkey: solStakerStakePubkey, isSigner: false, isWritable: true }, // stake
+    { pubkey: stakeAuthority, isSigner: true, isWritable: true }, // stakeAuthority
+    { pubkey: STAKE_VAULT, isSigner: false, isWritable: true }, // vault
+    { pubkey: vaultAuthority, isSigner: false, isWritable: true }, // vaultAuthority
+    { pubkey: STAKE_VAULT_HOLDER_REWARDS, isSigner: false, isWritable: true }, // vaultHolderRewards
+    { pubkey: PAL_MINT, isSigner: false, isWritable: false }, // mint
+    { pubkey: destinationTokenAccount, isSigner: false, isWritable: true }, // destinationTokenAccount
+    { pubkey: TOKEN_2022_PROGRAM_ID, isSigner: false, isWritable: false }, // tokenProgram
+  ];
+
+  return new TransactionInstruction({
+    keys,
+    programId: STAKE_PROGRAM_ID,
+    data,
+  });
+}
+
+/**
+ * Gets all SOL stake accounts for a given authority
+ * @param connection Solana connection instance
+ * @param authority The authority public key
+ * @returns Array of SOL stake account public keys
+ */
+async function getSolStakeAccountsForAuthority(
+  connection: Connection,
+  authority: PublicKey
+): Promise<PublicKey[]> {
+  const programAccounts = await connection.getProgramAccounts(
+    new PublicKey("Stake11111111111111111111111111111111111111"), // Native stake program
+    {
+      filters: [
+        {
+          memcmp: {
+            offset: 12, // Offset for authorized staker
+            bytes: authority.toBase58()
+          }
+        }
+      ]
+    }
+  );
+  
+  return programAccounts.map(account => account.pubkey);
+}
+
+/**
+ * Creates a complete unstake transaction for sol staker staking
+ * @param account The wallet public key or address string
+ * @param amount The amount of tokens to unstake
+ * @param connection Solana connection instance
+ * @returns A versioned transaction ready for signing
+ */
+export async function makeSolStakerUnstakeTransaction(
+  account: PublicKey | string,
+  amount: bigint,
+  connection: Connection
+): Promise<VersionedTransaction> {
+  // Convert string to PublicKey if necessary
+  const pubkey = typeof account === 'string' ? new PublicKey(account) : account;
+  
+  // Get all SOL stake accounts for this authority
+  const solStakeAccounts = await getSolStakeAccountsForAuthority(connection, pubkey);
+  
+  if (solStakeAccounts.length === 0) {
+    throw new Error(`No SOL stake accounts found for authority: ${pubkey.toBase58()}`);
+  }
+  
+  // For now, we'll use the first SOL stake account
+  // In a real implementation, you might want to let the user choose or have additional logic
+  const solStakerNativeStake = solStakeAccounts[0];
+  
+  // Derive the sol staker stake PDA
+  const [solStakerStakePda] = findSolStakerStakePda(
+    solStakerNativeStake,
+    STAKE_CONFIG,
+    STAKE_PROGRAM_ID
+  );
+  
+  // Get the destination token account (PAL ATA for the user)
+  const destinationTokenAccount = getAssociatedTokenAddressSync(
+    PAL_MINT,
+    pubkey,
+    true,
+    TOKEN_2022_PROGRAM_ID
+  );
+  
+  // Add compute budget instruction
+  const computeBudgetIx = ComputeBudgetProgram.setComputeUnitLimit({
+    units: 300_000
+  });
+
+  const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: 1000,
+  });
+  
+  // Get the latest blockhash
+  const { blockhash } = await connection.getLatestBlockhash();
+
+  const unstakeIx = getSolStakerUnstakeInstruction({
+    solStakerStakePubkey: solStakerStakePda,
+    stakeAuthority: pubkey,
+    destinationTokenAccount,
+    amount,
+  });
+  
+  const instructions = [computeBudgetIx, addPriorityFee, unstakeIx];
+  
+  // Create a transaction message
+  const messageV0 = new TransactionMessage({
+    payerKey: pubkey,
+    recentBlockhash: blockhash,
+    instructions
+  }).compileToV0Message();
+  
+  // Create the versioned transaction
+  const tx = new VersionedTransaction(messageV0);
+  
+  return tx;
+}
