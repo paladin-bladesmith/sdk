@@ -1,6 +1,6 @@
 {
   "name": "@paladin-bladesmith/sdk",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "SDK for Paladin programs on Solana",
   "private": false,
   "publishConfig": {
