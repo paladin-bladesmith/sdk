@@ -28,8 +28,6 @@ export const getLockupInstructionDetails = (name: string) => {
 export const getStakeInstructionDetails = (name: string) => {
   const instruction = stakeIdl.instructions.find((ix: any) => ix.name === name);
 
-  console.log("Stake instruction details:", instruction);
-
   if (!instruction) {
     throw new Error(`Instruction ${name} not found in stake IDL`);
   }

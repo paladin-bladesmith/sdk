@@ -11,7 +11,7 @@ import {
   STAKE_CONFIG, 
   STAKE_VAULT,
   STAKE_VAULT_HOLDER_REWARDS,
-  PAL_MINT,
+  TOKEN_MINT,
 } from "../../../utils/constants";
 import { getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { Buffer } from "buffer";
@@ -55,7 +55,7 @@ function getValidatorUnstakeInstruction({
     { pubkey: STAKE_VAULT, isSigner: false, isWritable: true }, // vault
     { pubkey: vaultAuthority, isSigner: false, isWritable: true }, // vaultAuthority
     { pubkey: STAKE_VAULT_HOLDER_REWARDS, isSigner: false, isWritable: true }, // vaultHolderRewards
-    { pubkey: PAL_MINT, isSigner: false, isWritable: false }, // mint
+    { pubkey: TOKEN_MINT, isSigner: false, isWritable: false }, // mint
     { pubkey: destinationTokenAccount, isSigner: false, isWritable: true }, // destinationTokenAccount
     { pubkey: TOKEN_2022_PROGRAM_ID, isSigner: false, isWritable: false }, // tokenProgram
   ];
@@ -102,7 +102,7 @@ export async function makeValidatorUnstakeTransaction(
   
   // Get the destination token account (PAL ATA for the user)
   const destinationTokenAccount = getAssociatedTokenAddressSync(
-    PAL_MINT,
+    TOKEN_MINT,
     pubkey
   );
   

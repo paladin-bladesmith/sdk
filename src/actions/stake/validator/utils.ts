@@ -59,3 +59,44 @@ export async function getValidatorVoteAccount(
     throw new Error(`Failed to get vote account for validator ${identityPubkey.toBase58()}: ${error}`);
   }
 }
+
+/**
+ * Gets both the vote account and withdraw authority for a given validator identity
+ * @param connection Solana connection instance
+ * @param validatorIdentity The validator's identity public key
+ * @returns Object containing vote account pubkey and withdraw authority, or null if not found
+ */
+export async function getValidatorVoteAccountWithAuthority(
+  connection: Connection,
+  validatorIdentity: PublicKey | string
+): Promise<{ voteAccount: PublicKey; withdrawAuthority: PublicKey } | null> {
+  const voteAccountPubkey = await getValidatorVoteAccount(connection, validatorIdentity);
+  
+  if (!voteAccountPubkey) {
+    return null;
+  }
+  
+  try {
+    // Fetch the vote account data to extract withdraw authority
+    const accountInfo = await connection.getAccountInfo(voteAccountPubkey);
+    
+    if (!accountInfo || !accountInfo.data) {
+      throw new Error('Vote account data not found');
+    }
+    
+    // Extract withdraw authority from byte offset 36 (32 bytes for pubkey)
+    const withdrawAuthorityBytes = accountInfo.data.slice(36, 68);
+    const withdrawAuthority = new PublicKey(withdrawAuthorityBytes);
+    
+    return {
+      voteAccount: voteAccountPubkey,
+      withdrawAuthority
+    };
+  } catch (error) {
+    const identityStr = typeof validatorIdentity === 'string' 
+      ? validatorIdentity 
+      : validatorIdentity.toBase58();
+    console.error('Error fetching vote account data:', error);
+    throw new Error(`Failed to get withdraw authority for validator ${identityStr}: ${error}`);
+  }
+}

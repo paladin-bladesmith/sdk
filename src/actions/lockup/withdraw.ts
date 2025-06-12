@@ -15,7 +15,7 @@ import {
     TOKEN_MINT,
     EXTRA_ACCOUNT_METAS,
     HOLDER_REWARDS_POOL,
-    RECIPIENT_REWARDS,
+    LOCKUP_REWARDS,
     REWARDS_PROGRAM_ID
   } from "../../utils/constants";
   import { 
@@ -124,13 +124,13 @@ import {
       },
       // #11 Holder Rewards Account
       {
-        pubkey: getHolderRewardsAddress(tokenDestination, REWARDS_PROGRAM_ID),
+        pubkey: LOCKUP_REWARDS,
         isSigner: false, 
         isWritable: true,
       },
       // #12 Recipient Rewards
       {
-        pubkey: RECIPIENT_REWARDS,
+        pubkey: getHolderRewardsAddress(tokenDestination, REWARDS_PROGRAM_ID),
         isSigner: false,
         isWritable: true
       },

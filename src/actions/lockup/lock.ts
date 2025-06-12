@@ -20,7 +20,7 @@ import {
   LOCKUP_POOL,
   EXTRA_ACCOUNT_METAS,
   HOLDER_REWARDS_POOL,
-  RECIPIENT_REWARDS,
+  LOCKUP_REWARDS,
   REWARDS_PROGRAM_ID
 } from "../../utils/constants";
 import { 
@@ -153,7 +153,7 @@ export function getLockupInstruction({
     },
     // #13 Recipient Rewards
     {
-      pubkey: RECIPIENT_REWARDS,
+      pubkey: LOCKUP_REWARDS,
       isSigner: false,
       isWritable: true
     },
