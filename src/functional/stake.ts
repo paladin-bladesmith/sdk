@@ -82,6 +82,10 @@ export async function validatorStakeTokens(
   validatorIdentityPubkey: PublicKey | string,
   amount: number
 ) {
+
+  // Convert to proper units (9 decimals because $PAL is 9 decimals)
+  amount = amount * 10 ** 9;
+
   if (!wallet.adapter.publicKey) {
     throw new Error('Wallet not connected');
   }
@@ -135,8 +139,10 @@ export async function unstakeValidatorTokens(
   wallet: Wallet,
   connection: Connection,
   validatorPubkey: PublicKey | string,
-  amount: bigint
+  amount: number
 ) {
+  console.log("[TEST] Unstaking validator tokens", validatorPubkey, amount);
+
   if (!wallet.adapter.publicKey) {
     throw new Error('Wallet not connected');
   }

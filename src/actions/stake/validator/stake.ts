@@ -71,12 +71,13 @@ export function getValidatorStakeTokensInstruction({
     { pubkey: EXTRA_ACCOUNT_METAS, isSigner: false, isWritable: false },
     // #10 Holder Rewards Pool
     { pubkey: HOLDER_REWARDS_POOL, isSigner: false, isWritable: true },
-    // #11 Holder Rewards Account
+    // #11 Source holder rewards account
     {
       pubkey: getHolderRewardsAddress(sourceTokenAccount, REWARDS_PROGRAM_ID),
       isSigner: false, 
       isWritable: true,
     },
+    // #12 Destination holder rewards account
     { pubkey: STAKE_VAULT_HOLDER_REWARDS, isSigner: false, isWritable: true },
     // #13 Rewards Program
     { pubkey: REWARDS_PROGRAM_ID, isSigner: false, isWritable: false }

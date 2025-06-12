@@ -12,12 +12,15 @@ import {
   STAKE_VAULT,
   STAKE_VAULT_HOLDER_REWARDS,
   TOKEN_MINT,
+  EXTRA_ACCOUNT_METAS,
+  HOLDER_REWARDS_POOL,
+  REWARDS_PROGRAM_ID
 } from "../../../utils/constants";
 import { getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { Buffer } from "buffer";
 import { findValidatorStakePda, getValidatorVoteAccount } from "./utils";
 import { findVaultAuthorityPda } from "../utils";
-import { getStakeInstructionDetails } from "../../../utils/helpers";
+import { getStakeInstructionDetails, getHolderRewardsAddress } from "../../../utils/helpers";
 
 /**
  * Creates an unstake instruction for validator staking
@@ -33,16 +36,22 @@ function getValidatorUnstakeInstruction({
   validatorStakePubkey: PublicKey;
   stakeAuthority: PublicKey;
   destinationTokenAccount: PublicKey;
-  amount: bigint;
+  amount: number;
 }): TransactionInstruction {
   // Get instruction details from IDL
   const instruction = getStakeInstructionDetails("UnstakeTokens");
+
+  console.log("[TEST] Unstake instruction", instruction);
   
-  // Create the instruction buffer with the discriminant value from IDL and amount
-  const discriminantBuffer = Buffer.from([instruction.discriminant.value]);
+  // Create the instruction data buffer
+  // UnstakeTokens has discriminant value and takes a u64 amount argument
+  const discriminatorBuffer = Buffer.from([instruction.discriminant.value]);
+
+  console.log("[TEST] Discriminant buffer", discriminatorBuffer);
+
   const amountBuffer = Buffer.allocUnsafe(8);
-  amountBuffer.writeBigUInt64LE(amount);
-  const data = Buffer.concat([discriminantBuffer, amountBuffer]);
+  amountBuffer.writeBigUInt64LE(BigInt(amount));
+  const data = Buffer.concat([discriminatorBuffer, amountBuffer]);
 
   // Derive vault authority PDA
   const [vaultAuthority] = findVaultAuthorityPda(STAKE_VAULT, STAKE_PROGRAM_ID);
@@ -58,6 +67,20 @@ function getValidatorUnstakeInstruction({
     { pubkey: TOKEN_MINT, isSigner: false, isWritable: false }, // mint
     { pubkey: destinationTokenAccount, isSigner: false, isWritable: true }, // destinationTokenAccount
     { pubkey: TOKEN_2022_PROGRAM_ID, isSigner: false, isWritable: false }, // tokenProgram
+    // #9-13 Extra accounts for token 22 transfer
+    { pubkey: EXTRA_ACCOUNT_METAS, isSigner: false, isWritable: false },
+    // #10 Holder Rewards Pool
+    { pubkey: HOLDER_REWARDS_POOL, isSigner: false, isWritable: true },
+    // #11 Holder Rewards Account
+    { pubkey: STAKE_VAULT_HOLDER_REWARDS, isSigner: false, isWritable: true },
+    // #12 Destination holder rewards account
+    {
+      pubkey: getHolderRewardsAddress(destinationTokenAccount, REWARDS_PROGRAM_ID),
+      isSigner: false, 
+      isWritable: true,
+    },
+    // #13 Rewards Program
+    { pubkey: REWARDS_PROGRAM_ID, isSigner: false, isWritable: false }
   ];
 
   return new TransactionInstruction({
@@ -78,7 +101,7 @@ function getValidatorUnstakeInstruction({
 export async function makeValidatorUnstakeTransaction(
   account: PublicKey | string,
   validatorIdentityKey: PublicKey | string,
-  amount: bigint,
+  amount: number,
   connection: Connection
 ): Promise<VersionedTransaction> {
   // Convert string to PublicKey if necessary
