@@ -37,8 +37,77 @@ export async function initializeValidatorStake(
       connection
     );
     
-    // Send the transaction through the wallet adapter
-    const signature = await wallet.adapter.sendTransaction(transaction, connection);
+    // Development mode: Force bypass wallet simulation
+    const FORCE_NO_SIMULATION = process.env.NODE_ENV === 'development' || process.env.REACT_APP_FORCE_NO_SIM === 'true';
+    
+    if (FORCE_NO_SIMULATION) {
+      console.log('🚨 DEVELOPMENT MODE: Bypassing all wallet simulation');
+      
+      // Sign transaction but don't let wallet send it
+      let signedTransaction;
+      
+      // Check if wallet supports signTransaction (most modern wallets do)
+      if ('signTransaction' in wallet && typeof wallet.signTransaction === 'function') {
+        signedTransaction = await wallet.signTransaction(transaction);
+      } else if (wallet.adapter && 'signTransaction' in wallet.adapter && typeof wallet.adapter.signTransaction === 'function') {
+        signedTransaction = await wallet.adapter.signTransaction(transaction);
+      } else {
+        throw new Error('Wallet does not support transaction signing - cannot bypass simulation');
+      }
+      
+      // Send directly to chain, no simulation
+      const signature = await connection.sendRawTransaction(
+        signedTransaction.serialize(),
+        {
+          skipPreflight: true,
+          preflightCommitment: 'processed',
+          maxRetries: 3
+        }
+      );
+      
+      console.log('🚀 Transaction sent directly to chain:', signature);
+      
+      // Get latest blockhash for transaction confirmation
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      
+      return {
+        signature,
+        confirm: async (commitment: Commitment = 'confirmed') => {
+          return connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, commitment);
+        }
+      };
+    }
+    
+    // Normal flow with wallet simulation checks
+    // Sign the transaction with the wallet but bypass all simulation
+    let signedTransaction;
+    
+    // Check if wallet supports signTransaction (most modern wallets do)
+    if ('signTransaction' in wallet && typeof wallet.signTransaction === 'function') {
+      signedTransaction = await wallet.signTransaction(transaction);
+    } else if (wallet.adapter && 'signTransaction' in wallet.adapter && typeof wallet.adapter.signTransaction === 'function') {
+      signedTransaction = await wallet.adapter.signTransaction(transaction);
+    } else {
+      // Fallback to sendTransaction if no direct signing available (this will simulate)
+      const signature = await wallet.adapter.sendTransaction(transaction, connection, { skipPreflight: true });
+      return {
+        signature,
+        confirm: async (commitment: Commitment = 'confirmed') => {
+          const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+          return connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, commitment);
+        }
+      };
+    }
+    
+    // Send directly to bypass wallet simulation completely
+    const signature = await connection.sendRawTransaction(
+      signedTransaction.serialize(),
+      {
+        skipPreflight: true,
+        preflightCommitment: 'processed',
+        maxRetries: 3
+      }
+    );
     
     // Get latest blockhash for transaction confirmation
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
@@ -82,6 +151,10 @@ export async function validatorStakeTokens(
   validatorIdentityPubkey: PublicKey | string,
   amount: number
 ) {
+
+  // Convert to proper units (9 decimals because $PAL is 9 decimals)
+  amount = amount * 10 ** 9;
+
   if (!wallet.adapter.publicKey) {
     throw new Error('Wallet not connected');
   }
@@ -95,8 +168,77 @@ export async function validatorStakeTokens(
       connection
     );
     
-    // Send the transaction through the wallet adapter
-    const signature = await wallet.adapter.sendTransaction(transaction, connection);
+    // Development mode: Force bypass wallet simulation
+    const FORCE_NO_SIMULATION = process.env.NODE_ENV === 'development' || process.env.REACT_APP_FORCE_NO_SIM === 'true';
+    
+    if (FORCE_NO_SIMULATION) {
+      console.log('🚨 DEVELOPMENT MODE: Bypassing all wallet simulation');
+      
+      // Sign transaction but don't let wallet send it
+      let signedTransaction;
+      
+      // Check if wallet supports signTransaction (most modern wallets do)
+      if ('signTransaction' in wallet && typeof wallet.signTransaction === 'function') {
+        signedTransaction = await wallet.signTransaction(transaction);
+      } else if (wallet.adapter && 'signTransaction' in wallet.adapter && typeof wallet.adapter.signTransaction === 'function') {
+        signedTransaction = await wallet.adapter.signTransaction(transaction);
+      } else {
+        throw new Error('Wallet does not support transaction signing - cannot bypass simulation');
+      }
+      
+      // Send directly to chain, no simulation
+      const signature = await connection.sendRawTransaction(
+        signedTransaction.serialize(),
+        {
+          skipPreflight: true,
+          preflightCommitment: 'processed',
+          maxRetries: 3
+        }
+      );
+      
+      console.log('🚀 Transaction sent directly to chain:', signature);
+      
+      // Get latest blockhash for transaction confirmation
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      
+      return {
+        signature,
+        confirm: async (commitment: Commitment = 'confirmed') => {
+          return connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, commitment);
+        }
+      };
+    }
+    
+    // Normal flow with wallet simulation checks
+    // Sign the transaction with the wallet but bypass all simulation
+    let signedTransaction;
+    
+    // Check if wallet supports signTransaction (most modern wallets do)
+    if ('signTransaction' in wallet && typeof wallet.signTransaction === 'function') {
+      signedTransaction = await wallet.signTransaction(transaction);
+    } else if (wallet.adapter && 'signTransaction' in wallet.adapter && typeof wallet.adapter.signTransaction === 'function') {
+      signedTransaction = await wallet.adapter.signTransaction(transaction);
+    } else {
+      // Fallback to sendTransaction if no direct signing available (this will simulate)
+      const signature = await wallet.adapter.sendTransaction(transaction, connection, { skipPreflight: true });
+      return {
+        signature,
+        confirm: async (commitment: Commitment = 'confirmed') => {
+          const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+          return connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, commitment);
+        }
+      };
+    }
+    
+    // Send directly to bypass wallet simulation completely
+    const signature = await connection.sendRawTransaction(
+      signedTransaction.serialize(),
+      {
+        skipPreflight: true,
+        preflightCommitment: 'processed',
+        maxRetries: 3
+      }
+    );
     
     // Get latest blockhash for transaction confirmation
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
@@ -135,8 +277,10 @@ export async function unstakeValidatorTokens(
   wallet: Wallet,
   connection: Connection,
   validatorPubkey: PublicKey | string,
-  amount: bigint
+  amount: number
 ) {
+  console.log("[TEST] Unstaking validator tokens", validatorPubkey, amount);
+
   if (!wallet.adapter.publicKey) {
     throw new Error('Wallet not connected');
   }
@@ -150,8 +294,77 @@ export async function unstakeValidatorTokens(
       connection
     );
     
-    // Send the transaction through the wallet adapter
-    const signature = await wallet.adapter.sendTransaction(transaction, connection);
+    // Development mode: Force bypass wallet simulation
+    const FORCE_NO_SIMULATION = true;
+    
+    if (FORCE_NO_SIMULATION) {
+      console.log('🚨 DEVELOPMENT MODE: Bypassing all wallet simulation');
+      
+      // Sign transaction but don't let wallet send it
+      let signedTransaction;
+      
+      // Check if wallet supports signTransaction (most modern wallets do)
+      if ('signTransaction' in wallet && typeof wallet.signTransaction === 'function') {
+        signedTransaction = await wallet.signTransaction(transaction);
+      } else if (wallet.adapter && 'signTransaction' in wallet.adapter && typeof wallet.adapter.signTransaction === 'function') {
+        signedTransaction = await wallet.adapter.signTransaction(transaction);
+      } else {
+        throw new Error('Wallet does not support transaction signing - cannot bypass simulation');
+      }
+      
+      // Send directly to chain, no simulation
+      const signature = await connection.sendRawTransaction(
+        signedTransaction.serialize(),
+        {
+          skipPreflight: true,
+          preflightCommitment: 'processed',
+          maxRetries: 3
+        }
+      );
+      
+      console.log('🚀 Transaction sent directly to chain:', signature);
+      
+      // Get latest blockhash for transaction confirmation
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      
+      return {
+        signature,
+        confirm: async (commitment: Commitment = 'confirmed') => {
+          return connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, commitment);
+        }
+      };
+    }
+    
+    // Normal flow with wallet simulation checks
+    // Sign the transaction with the wallet but bypass all simulation
+    let signedTransaction;
+    
+    // Check if wallet supports signTransaction (most modern wallets do)
+    if ('signTransaction' in wallet && typeof wallet.signTransaction === 'function') {
+      signedTransaction = await wallet.signTransaction(transaction);
+    } else if (wallet.adapter && 'signTransaction' in wallet.adapter && typeof wallet.adapter.signTransaction === 'function') {
+      signedTransaction = await wallet.adapter.signTransaction(transaction);
+    } else {
+      // Fallback to sendTransaction if no direct signing available (this will simulate)
+      const signature = await wallet.adapter.sendTransaction(transaction, connection, { skipPreflight: true });
+      return {
+        signature,
+        confirm: async (commitment: Commitment = 'confirmed') => {
+          const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+          return connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, commitment);
+        }
+      };
+    }
+    
+    // Send directly to bypass wallet simulation completely
+    const signature = await connection.sendRawTransaction(
+      signedTransaction.serialize(),
+      {
+        skipPreflight: true,
+        preflightCommitment: 'processed',
+        maxRetries: 3
+      }
+    );
     
     // Get latest blockhash for transaction confirmation
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
@@ -205,8 +418,77 @@ export async function unstakeSolStakerTokens(
       connection
     );
     
-    // Send the transaction through the wallet adapter
-    const signature = await wallet.adapter.sendTransaction(transaction, connection);
+    // Development mode: Force bypass wallet simulation
+    const FORCE_NO_SIMULATION = process.env.NODE_ENV === 'development' || process.env.REACT_APP_FORCE_NO_SIM === 'true';
+    
+    if (FORCE_NO_SIMULATION) {
+      console.log('🚨 DEVELOPMENT MODE: Bypassing all wallet simulation');
+      
+      // Sign transaction but don't let wallet send it
+      let signedTransaction;
+      
+      // Check if wallet supports signTransaction (most modern wallets do)
+      if ('signTransaction' in wallet && typeof wallet.signTransaction === 'function') {
+        signedTransaction = await wallet.signTransaction(transaction);
+      } else if (wallet.adapter && 'signTransaction' in wallet.adapter && typeof wallet.adapter.signTransaction === 'function') {
+        signedTransaction = await wallet.adapter.signTransaction(transaction);
+      } else {
+        throw new Error('Wallet does not support transaction signing - cannot bypass simulation');
+      }
+      
+      // Send directly to chain, no simulation
+      const signature = await connection.sendRawTransaction(
+        signedTransaction.serialize(),
+        {
+          skipPreflight: true,
+          preflightCommitment: 'processed',
+          maxRetries: 3
+        }
+      );
+      
+      console.log('🚀 Transaction sent directly to chain:', signature);
+      
+      // Get latest blockhash for transaction confirmation
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      
+      return {
+        signature,
+        confirm: async (commitment: Commitment = 'confirmed') => {
+          return connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, commitment);
+        }
+      };
+    }
+    
+    // Normal flow with wallet simulation checks
+    // Sign the transaction with the wallet but bypass all simulation
+    let signedTransaction;
+    
+    // Check if wallet supports signTransaction (most modern wallets do)
+    if ('signTransaction' in wallet && typeof wallet.signTransaction === 'function') {
+      signedTransaction = await wallet.signTransaction(transaction);
+    } else if (wallet.adapter && 'signTransaction' in wallet.adapter && typeof wallet.adapter.signTransaction === 'function') {
+      signedTransaction = await wallet.adapter.signTransaction(transaction);
+    } else {
+      // Fallback to sendTransaction if no direct signing available (this will simulate)
+      const signature = await wallet.adapter.sendTransaction(transaction, connection, { skipPreflight: true });
+      return {
+        signature,
+        confirm: async (commitment: Commitment = 'confirmed') => {
+          const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+          return connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, commitment);
+        }
+      };
+    }
+    
+    // Send directly to bypass wallet simulation completely
+    const signature = await connection.sendRawTransaction(
+      signedTransaction.serialize(),
+      {
+        skipPreflight: true,
+        preflightCommitment: 'processed',
+        maxRetries: 3
+      }
+    );
     
     // Get latest blockhash for transaction confirmation
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();

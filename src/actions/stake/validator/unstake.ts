@@ -11,13 +11,16 @@ import {
   STAKE_CONFIG, 
   STAKE_VAULT,
   STAKE_VAULT_HOLDER_REWARDS,
+  STAKE_VAULT_AUTHORITY,
   TOKEN_MINT,
+  EXTRA_ACCOUNT_METAS,
+  HOLDER_REWARDS_POOL,
+  REWARDS_PROGRAM_ID
 } from "../../../utils/constants";
 import { getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { Buffer } from "buffer";
-import { findValidatorStakePda, getValidatorVoteAccount } from "./utils";
-import { findVaultAuthorityPda } from "../utils";
-import { getStakeInstructionDetails } from "../../../utils/helpers";
+import { findValidatorStakePda, getValidatorVoteAccountWithAuthority } from "./utils";
+import { getStakeInstructionDetails, getHolderRewardsAddress } from "../../../utils/helpers";
 
 /**
  * Creates an unstake instruction for validator staking
@@ -33,19 +36,22 @@ function getValidatorUnstakeInstruction({
   validatorStakePubkey: PublicKey;
   stakeAuthority: PublicKey;
   destinationTokenAccount: PublicKey;
-  amount: bigint;
+  amount: number;
 }): TransactionInstruction {
   // Get instruction details from IDL
   const instruction = getStakeInstructionDetails("UnstakeTokens");
   
-  // Create the instruction buffer with the discriminant value from IDL and amount
-  const discriminantBuffer = Buffer.from([instruction.discriminant.value]);
-  const amountBuffer = Buffer.allocUnsafe(8);
-  amountBuffer.writeBigUInt64LE(amount);
-  const data = Buffer.concat([discriminantBuffer, amountBuffer]);
+  // Create the instruction data buffer
+  // UnstakeTokens has discriminant value and takes a u64 amount argument
+  const discriminatorBuffer = Buffer.from([instruction.discriminant.value]);
+
+  const amountBuffer = Buffer.alloc(8);
+  amountBuffer.writeBigUInt64LE(BigInt(amount));
+
+  const data = Buffer.concat([discriminatorBuffer, amountBuffer]);
 
   // Derive vault authority PDA
-  const [vaultAuthority] = findVaultAuthorityPda(STAKE_VAULT, STAKE_PROGRAM_ID);
+  // const [vaultAuthority] = findVaultAuthorityPda(STAKE_VAULT, STAKE_PROGRAM_ID);
 
   // Define account metas based on IDL structure
   const keys = [
@@ -53,11 +59,25 @@ function getValidatorUnstakeInstruction({
     { pubkey: validatorStakePubkey, isSigner: false, isWritable: true }, // stake
     { pubkey: stakeAuthority, isSigner: true, isWritable: true }, // stakeAuthority
     { pubkey: STAKE_VAULT, isSigner: false, isWritable: true }, // vault
-    { pubkey: vaultAuthority, isSigner: false, isWritable: true }, // vaultAuthority
+    { pubkey: STAKE_VAULT_AUTHORITY, isSigner: false, isWritable: true }, // vaultAuthority
     { pubkey: STAKE_VAULT_HOLDER_REWARDS, isSigner: false, isWritable: true }, // vaultHolderRewards
     { pubkey: TOKEN_MINT, isSigner: false, isWritable: false }, // mint
     { pubkey: destinationTokenAccount, isSigner: false, isWritable: true }, // destinationTokenAccount
     { pubkey: TOKEN_2022_PROGRAM_ID, isSigner: false, isWritable: false }, // tokenProgram
+    // #9-13 Extra accounts for token 22 transfer
+    { pubkey: EXTRA_ACCOUNT_METAS, isSigner: false, isWritable: false },
+    // #10 Holder Rewards Pool
+    { pubkey: HOLDER_REWARDS_POOL, isSigner: false, isWritable: true },
+    // #11 Holder Rewards Account
+    { pubkey: STAKE_VAULT_HOLDER_REWARDS, isSigner: false, isWritable: true },
+    // #12 Destination holder rewards account
+    {
+      pubkey: getHolderRewardsAddress(destinationTokenAccount, REWARDS_PROGRAM_ID),
+      isSigner: false, 
+      isWritable: true,
+    },
+    // #13 Rewards Program
+    { pubkey: REWARDS_PROGRAM_ID, isSigner: false, isWritable: false }
   ];
 
   return new TransactionInstruction({
@@ -78,22 +98,25 @@ function getValidatorUnstakeInstruction({
 export async function makeValidatorUnstakeTransaction(
   account: PublicKey | string,
   validatorIdentityKey: PublicKey | string,
-  amount: bigint,
+  amount: number,
   connection: Connection
 ): Promise<VersionedTransaction> {
-  // Convert string to PublicKey if necessary
-  const pubkey = typeof account === 'string' ? new PublicKey(account) : account;
+  const userPubkey = typeof account === 'string' ? new PublicKey(account) : account;
+  const validatorIdentity = typeof validatorIdentityKey === 'string' 
+    ? new PublicKey(validatorIdentityKey) 
+    : validatorIdentityKey;
   
-  // Get the vote account from the validator identity
-  const validatorVotePubkey = await getValidatorVoteAccount(connection, validatorIdentityKey);
-  if (!validatorVotePubkey) {
-    const identityStr = typeof validatorIdentityKey === 'string' 
-      ? validatorIdentityKey 
-      : validatorIdentityKey.toBase58();
-    throw new Error(`Could not find vote account for validator identity: ${identityStr}`);
+  if (!userPubkey) throw new Error("Account is required");
+  
+  // Get the vote account and withdraw authority from the validator identity
+  const voteAccountInfo = await getValidatorVoteAccountWithAuthority(connection, validatorIdentity);
+  if (!voteAccountInfo) {
+    throw new Error(`Could not find vote account for validator identity: ${validatorIdentity.toBase58()}`);
   }
   
-  // Derive the validator stake PDA using the same seeds as the Rust program
+  const { voteAccount: validatorVotePubkey, withdrawAuthority } = voteAccountInfo;
+  
+  // Derive the validator stake PDA using the same seeds as the initializeValidatorStake
   const [validatorStakePda] = findValidatorStakePda(
     validatorVotePubkey,
     STAKE_CONFIG,
@@ -103,12 +126,22 @@ export async function makeValidatorUnstakeTransaction(
   // Get the destination token account (PAL ATA for the user)
   const destinationTokenAccount = getAssociatedTokenAddressSync(
     TOKEN_MINT,
-    pubkey
+    userPubkey,
+    true,
+    TOKEN_2022_PROGRAM_ID
   );
+
+  // Create the unstake instruction
+  const unstakeIx = getValidatorUnstakeInstruction({
+    validatorStakePubkey: validatorStakePda,
+    stakeAuthority: withdrawAuthority,
+    destinationTokenAccount,
+    amount,
+  });
   
   // Add compute budget instruction
   const computeBudgetIx = ComputeBudgetProgram.setComputeUnitLimit({
-    units: 300_000
+    units: 400_000
   });
 
   const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
@@ -117,21 +150,12 @@ export async function makeValidatorUnstakeTransaction(
   
   // Get the latest blockhash
   const { blockhash } = await connection.getLatestBlockhash();
-
-  const unstakeIx = getValidatorUnstakeInstruction({
-    validatorStakePubkey: validatorStakePda,
-    stakeAuthority: pubkey,
-    destinationTokenAccount,
-    amount,
-  });
-  
-  const instructions = [computeBudgetIx, addPriorityFee, unstakeIx];
   
   // Create a transaction message
   const messageV0 = new TransactionMessage({
-    payerKey: pubkey,
+    payerKey: userPubkey,
     recentBlockhash: blockhash,
-    instructions
+    instructions: [computeBudgetIx, addPriorityFee, unstakeIx],
   }).compileToV0Message();
   
   // Create the versioned transaction

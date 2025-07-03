@@ -20,7 +20,10 @@ import {
   HOLDER_REWARDS_POOL,
   REWARDS_PROGRAM_ID
 } from "../../../utils/constants";
-import { getStakeInstructionDetails, getHolderRewardsAddress } from "../../../utils/helpers";
+import { 
+  getStakeInstructionDetails, 
+  getHolderRewardsAddress 
+} from "../../../utils/helpers";
 import { findValidatorStakePda, getValidatorVoteAccountWithAuthority } from "./utils";
 import { Buffer } from "buffer";
 
@@ -51,8 +54,7 @@ export function getValidatorStakeTokensInstruction({
   
   // Convert amount to 8-byte buffer (little-endian u64)
   const amountBuffer = Buffer.alloc(8);
-  const view = new DataView(amountBuffer.buffer, amountBuffer.byteOffset, amountBuffer.byteLength);
-  view.setBigUint64(0, BigInt(amount), true); // true for little-endian
+  amountBuffer.writeBigUInt64LE(BigInt(amount));
   
   const data = Buffer.concat([discriminatorBuffer, amountBuffer]);
 
@@ -71,20 +73,21 @@ export function getValidatorStakeTokensInstruction({
     { pubkey: EXTRA_ACCOUNT_METAS, isSigner: false, isWritable: false },
     // #10 Holder Rewards Pool
     { pubkey: HOLDER_REWARDS_POOL, isSigner: false, isWritable: true },
-    // #11 Holder Rewards Account
+    // #11 Source holder rewards account
     {
       pubkey: getHolderRewardsAddress(sourceTokenAccount, REWARDS_PROGRAM_ID),
       isSigner: false, 
       isWritable: true,
     },
+    // #12 Destination holder rewards account
     { pubkey: STAKE_VAULT_HOLDER_REWARDS, isSigner: false, isWritable: true },
     // #13 Rewards Program
     { pubkey: REWARDS_PROGRAM_ID, isSigner: false, isWritable: false }
   ];
 
   return new TransactionInstruction({
-    keys,
     programId: STAKE_PROGRAM_ID,
+    keys,
     data,
   });
 }
@@ -110,7 +113,6 @@ export async function makeValidatorStakeTokensTransaction(
     : validatorIdentityKey;
   
   if (!userPubkey) throw new Error("Account is required");
-  console.log("User pubkey:", userPubkey.toBase58());
   
   // Get the vote account and withdraw authority from the validator identity
   const voteAccountInfo = await getValidatorVoteAccountWithAuthority(connection, validatorIdentity);
@@ -119,8 +121,6 @@ export async function makeValidatorStakeTokensTransaction(
   }
   
   const { voteAccount: validatorVotePubkey, withdrawAuthority } = voteAccountInfo;
-  console.log("Validator vote pubkey:", validatorVotePubkey.toBase58());
-  console.log("Withdraw authority:", withdrawAuthority.toBase58());
   
   // Derive the validator stake PDA using the same seeds as the initializeValidatorStake
   const [validatorStakePda] = findValidatorStakePda(
@@ -128,8 +128,6 @@ export async function makeValidatorStakeTokensTransaction(
     STAKE_CONFIG,
     STAKE_PROGRAM_ID
   );
-  
-  console.log("Validator stake PDA:", validatorStakePda.toBase58());
   
   // Get the user's PAL token account
   const sourceTokenAccount = getAssociatedTokenAddressSync(
@@ -139,8 +137,6 @@ export async function makeValidatorStakeTokensTransaction(
     TOKEN_2022_PROGRAM_ID
   );
   
-  console.log("Source token account:", sourceTokenAccount.toBase58());
-  
   // Create the stake instruction
   const stakeIx = getValidatorStakeTokensInstruction({
     userAuthority: userPubkey,
@@ -149,8 +145,6 @@ export async function makeValidatorStakeTokensTransaction(
     sourceTokenAccount,
     amount,
   });
-  
-  console.log("Full Stake instruction:", stakeIx);
   
   // Add compute budget instructions
   const computeBudgetIx = ComputeBudgetProgram.setComputeUnitLimit({
